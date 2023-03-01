@@ -1,0 +1,113 @@
+{% load static %}
+    {% load sender_tags %}
+    {% load sender_filters %}
+
+<div class="container position-relative mt-5 mb-0">
+    <div class="row">
+        <div class="col-lg-4 col-xl-3 col-md-12 col-sm-12">
+            <div class="card mb-5 border-{% if mailing.periodicity == 'Раз в неделю' and not mailing.weekday %}danger
+                            {% elif mailing.periodicity == 'Раз в месяц' and not mailing.monthdate %}danger
+                            {% elif not mailing.mail_dump %}danger{% else %}success
+                            {% endif %}">
+              <div class="card-header text-center bg-success">
+                  <h5 class="text-light">{{ mailing.title }}</h5>
+              </div>
+              <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Настройки рассылки</h6>
+                <table class="table table-striped {% if mailing.periodicity == 'Раз в неделю' and not mailing.weekday %}table-danger
+                            {% elif mailing.periodicity == 'Раз в месяц' and not mailing.monthdate %}table-danger
+                            {% elif not mailing.mail_dump %}table-danger{% else %}table-info
+                            {% endif %}">
+                    <tbody>
+                        <tr>
+                            <td class="col-4">Статус:</td>
+                            <td class="col-8">{{ mailing.status }}</td>
+                        </tr>
+                        <tr>
+                            <td class="col-4">График:</td>
+                            <td class="col-8">{{ mailing.periodicity }}</td>
+                        </tr>
+                        <tr>
+                            <td class="col-4">Время:</td>
+                            <td class="col-8">{{ mailing.hour.num_show }}:{{ mailing.minute.num_show }}</td>
+                        </tr>
+                        {% if mailing.periodicity == 'Раз в неделю' %}
+                        <tr {% if not mailing.weekday %}class="table-danger"{% endif %}>
+                            <td class="col-4">День:</td>
+                            <td class="col-8">{% if not mailing.weekday %}<strong>Не указано</strong>{% else %} {{ mailing.weekday }}{% endif %}</td>
+                        </tr>
+                        {% elif mailing.periodicity == 'Раз в месяц' and mailing.monthdate %}
+                        <tr {% if not mailing.monthdate %}class="table-danger"{% endif %}>
+                            <td class="col-4">Дата:</td>
+                            <td class="col-8">{% if not mailing.monthdate %}<strong>Не указано</strong>{% else %} {{ mailing.monthdate }}{% endif %}</td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <td class="col-4">Кол-во писем:</td>
+                            <td class="col-8">{% count_obj letters %}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                  <div class="row mx-1">
+                      <a class="p-1 btn btn-outline-primary w-50 px-0" href="{% url 'sender:update_mailing' mailing.pk %}"><strong>Изменить</strong></a>
+                      <a class="p-1 btn btn-outline-danger w-50 px-0" href="{% url 'sender:delete_mailing' mailing.pk %}"><strong>Удалить</strong></a>
+                  </div>
+              </div>
+                <div class="card-footer text-center {% if mailing.periodicity == 'Раз в неделю' and not mailing.weekday %}bg-danger
+                                                    {% elif mailing.periodicity == 'Раз в месяц' and not mailing.monthdate %}bg-danger
+                                                    {% elif not mailing.mail_dump %}bg-danger
+                                                    {% else %}bg-success
+                                                    {% endif %}">
+                    <span class="text-light"><strong>{% if mailing.periodicity == 'Раз в неделю' and not mailing.weekday %} Добавьте день недели рассылки!
+                    {% elif mailing.periodicity == 'Раз в месяц' and not mailing.monthdate %} Добавьте дату месяца рассылки!
+                    {% elif not mailing.mail_dump %} Загрузите базу мейлов! {% else %} Готово к работе! <br> Email: {{ mailing.from_email }}
+                            <a class="update-mailing-detail" style="text-decoration: underline" href="{% url 'sender:update_mailing' mailing.pk %}">Изменить email</a>
+                    {% endif %}</strong></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8 col-xl-9 col-md-12 col-sm-12">
+            <div class="card border-0 mb-5">
+                <div class="card-header text-center">
+                    {% if not letters %}
+                    <h5 class="text-center">У Вас пока нет писем в данной рассылке, создайте их, чтобы запустить рассылку</h5>
+                    {% endif %}
+                        <a class="p-1 btn btn-outline-success w-50" href="{% url 'sender:create_letter' mailing.pk %}"><strong>Создать новое письмо</strong></a>
+                </div>
+              <div class="card-body px-0 py-0">
+                <table class="table table-striped table-info">
+                    {% if letters %}
+                    <thead>
+                        <tr>
+                            <th class="col-3" scope="col">Тема</th>
+                            <th class="col-6" scope="col">Содержание письма</th>
+                            <th class="col-3" scope="col">Статус</th>
+                            <th class="col-1" scope="col"></th>
+                        </tr>
+                    </thead>
+                    {% endif %}
+                    <tbody>
+                    {% for letter in letters %}
+                        <tr class="{% if letter.status == 'Ожидает отправки' %}table-light
+                                {% elif letter.status == 'Отправлено'  %}table-success
+                                {% endif %}">
+                            <td>{{ letter.title }}</td>
+                            <td>{{ letter.content|truncatechars:200 }}</td>
+                            <td>{{ letter.status }}. Очередь: <strong># {{ letter.position|cutlastchar }}</strong></td>
+                            <td>
+                                <a href="{{ letter.get_absolute_url }}">
+                                    <img class="mb-2" src="{% static "img/update.png" %}" title="Редактировать письмо">
+                                </a>
+                                <a href="{% url 'sender:delete_letter' mailing.pk letter.pk %}">
+                                    <img src="{% static "img/delete.png" %}" title="Удалить письмо">
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+              </div>
+            </div>
+        </div>
+    </div>
+</div>

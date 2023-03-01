@@ -1,0 +1,74 @@
+{% extends 'sender/base.html' %}
+
+{% block content %}
+    {% load static %}
+    {% load sender_tags %}
+    {% load sender_filters %}
+
+
+<div class="container position-relative form-imitation-popup-parent mx-0 py-0">
+     <div class="card card-form-popup mb-5 box-shadow text-center border-dark border-2 px-0" style="max-width: 550px">
+        <div class="card-header bg-success px-0 border-0 card-header-form-popup">
+            <h4 class="text-light my-0 font-weight-normal header-text-form-popup">Даты месяца рассылки</h4>
+            <a class="close-header-form-popup" href="{% url 'sender:mailing_detail' object.pk %}">
+                <img src="{% static 'img/close.png' %}"></a>
+        </div>
+     <form class="form-container" method="post" enctype="multipart/form-data">
+        <div class="card-body text-center">
+            {% csrf_token %}
+            <span>Выберите даты месяца, по которым нужно производить рассылку</span>
+        </div>
+        <div class="card-body my-0 mx-0 px-0">
+            <div class="input-group mx-0 px-0">
+                {% for field in form.fields %}
+               <input type="text" id="id_{{ field }}" name="{% if field|checkmonthdate:object %}{{ field|cutfieldfornum }}{% else %}False{% endif %}" class="form-input btn my-1 mx-1" value="{{ field|cutfieldfornum }}"
+                       onclick="changeValuesClick(this)" style="{% if field|checkmonthdate:object %}background-color: rgb(25, 135, 84);color: rgb(248, 249, 250);border-color: rgb(25, 135, 84);
+                                                                {% else %}background-color: rgb(248, 249, 250);color: rgb(0, 0, 0);border-color: rgb(0, 0, 0);
+                                                                {% endif %}border-radius: 0px;max-width: 55px">
+                {% endfor %}
+            </div>
+        </div>
+        <div class="card-footer bg-transparent border-0 mb-2 px-3">
+            <div class="row">
+                <div class="col-6">
+                    <button class="btn btn-outline-success w-100 border-1" type="submit"><strong>Сохранить</strong></button>
+                </div>
+                <div class="col-6">
+                    <a class="btn btn-primary w-100 border-1" href="{% url 'sender:mailing_detail' object.pk %}"><strong>Отмена</strong>
+                    </a>
+                </div>
+            </div>
+        </div>
+     </form>
+      </div>
+ </div>
+{% include 'sender/includes/mailing_detail_for_mailing_generic.html' %}
+
+<script>
+function changeValuesClick(input_selected) {
+    var inp_name = input_selected.name
+    var imp_value = input_selected.value
+    if (input_selected.style.backgroundColor === "rgb(248, 249, 250)"){
+        input_selected.style.backgroundColor = "rgb(25, 135, 84)";
+    }else {
+        input_selected.style.backgroundColor = "rgb(248, 249, 250)";
+    }
+    if (input_selected.style.color === "rgb(0, 0, 0)"){
+        input_selected.style.color = "rgb(248, 249, 250)";
+    }else {
+        input_selected.style.color = "rgb(0, 0, 0)";
+    }
+    if (input_selected.style.borderColor === "rgb(0, 0, 0)"){
+        input_selected.style.borderColor = "rgb(25, 135, 84)";
+    }else {
+        input_selected.style.borderColor = "rgb(0, 0, 0)";
+    }
+    if (inp_name === imp_value){
+        input_selected.name = "False";
+    }else {
+        input_selected.name = imp_value;
+    }
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'sender/base.html' %}
+
+{% block content %}
+    {% load static %}
+    {% load sender_tags %}
+    {% load sender_filters %}
+
+
+<div class="container position-relative form-imitation-popup-parent mx-0 py-0">
+      <div class="card card-form-popup mb-5 box-shadow text-center border-dark border-2 mx-2">
+            <div class="card-header bg-success px-0 border-0" style="display: flex;">
+                <h4 style="flex-grow: 1" class="text-light my-0 font-weight-normal">Удалить рассылку</h4>
+                <a style="margin-left: auto;" href="{% url 'sender:mailing_detail' object.pk %}">
+                    <img class="px-0" src="{% static 'img/close.png' %}"></a>
+            </div>
+        <form class="form-container" method="post" enctype="multipart/form-data">
+            <div class="card-body">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <p>Вы действительно хотите удалить рассылку</p>
+            <p>"{{ object.title }}" ? Отменить удаление будет невозможно!</p>
+            </div>
+            <div class="card-footer bg-transparent border-0 mb-2 px-3">
+                <div class="row">
+                    <div class="col-6">
+                        <button class="btn btn-outline-danger w-100 px-1 border-1" type="submit"><strong>Удалить</strong></button>
+                    </div>
+                    <div class="col-6">
+                        <a class="btn btn-primary w-100 px-1 border-1" href="{% url 'sender:mailing_detail' object.pk %}"><strong>Отмена</strong></a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% include 'sender/includes/mailing_detail_for_mailing_generic.html' %}
+
+{% endblock %}

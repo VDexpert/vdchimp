@@ -1,0 +1,153 @@
+{% load static %}
+    {% load sender_tags %}
+    {% load sender_filters %}
+
+<div class="container position-relative mt-5 mb-0">
+    <div class="row">
+        <div class="col-lg-4 col-xl-3 col-md-12 col-sm-12">
+            <div class="card mb-5 border-success">
+              <div class="card-header text-center bg-success">
+                  <h5 class="text-light">{{ object.title }}</h5>
+              </div>
+              <div class="card-body pb-0">
+                    <h6 class="card-subtitle mb-2 text-muted">Настройки рассылки</h6>
+                    <table class="table table-info mb-0">
+                        <tbody>
+                            <tr>
+                                <td class="col-4">График:</td>
+                                <td class="col-8">{{ object.periodicity }}</td>
+                            </tr>
+                            <tr>
+                                <td class="col-4">Время:</td>
+                                <td class="col-8">{{ object.hour }}:{% if object.minute < 10 %}0{{ object.minute }}
+                                                                    {% else %}{{ object.minute }}
+                                                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+               </div>
+               {% if object.periodicity == 'Один/несколько дней в неделю' %}
+                <div class="card-footer mx-3 px-2 mt-0 {% if not object.weekdays %}td-table-danger{% else %}td-table-info{% endif %}">
+                    <span>
+                            {% if not object.weekdays %}
+                                <a class="icon-update-cron" href="{% url 'sender:update_weekday' object.pk %}">
+                                    <img src="{% static 'img/updateblack.png' %}">
+                                </a>
+                                <a class="link-update-cron" href="{% url 'sender:update_weekday' object.pk %}">
+                                    <strong>Укажите дни</strong>
+                                </a>
+                            {% else %}
+                                <a class="icon-update-cron" href="{% url 'sender:update_weekday' object.pk %}">
+                                    <img src="{% static 'img/updateblack.png' %}">
+                                </a>
+                                <a class="link-update-cron" href="{% url 'sender:update_weekday' object.pk %}">
+                                    <strong>Дни</strong>
+                                </a>&nbsp;&nbsp;{{ object.weekdays_text }}
+                            {% endif %}
+                    </span>
+               </div>
+                {% elif object.periodicity == 'Один/несколько дней в месяц' %}
+               <div class="card-footer mx-3 px-2 mt-0 {% if not object.monthdates %}td-table-danger{% else %}td-table-info{% endif %}">
+                    <span>
+                            {% if not object.monthdates %}
+                                <a class="icon-update-cron" href="{% url 'sender:update_monthdate' object.pk %}">
+                                    <img src="{% static 'img/updateblack.png' %}">
+                                </a>
+                                <a class="link-update-cron" href="{% url 'sender:update_monthdate' object.pk %}">
+                                    <strong>Укажите даты</strong>
+                                </a>
+                            {% else %}
+                                <a class="icon-update-cron" href="{% url 'sender:update_monthdate' object.pk %}">
+                                    <img src="{% static 'img/updateblack.png' %}">
+                                </a>
+                                <a class="link-update-cron" href="{% url 'sender:update_monthdate' object.pk %}">
+                                    <strong>Даты</strong>
+                                </a>&nbsp;&nbsp;{{ object.monthdates_text }}
+                            {% endif %}
+                    </span>
+                </div>
+              {% endif %}
+                <div class="card-footer border-0">
+                      <div class="row mx-1">
+                          <a class="p-1 btn btn-outline-primary w-50 px-0" href="{% url 'sender:update_mailing' object.pk %}">
+                              <strong>Изменить</strong>
+                          </a>
+                          <a class="p-1 btn btn-outline-danger w-50 px-0" href="{% url 'sender:delete_mailing' object.pk %}">
+                              <strong>Удалить</strong>
+                          </a>
+                      </div>
+                 </div>
+                <div class="card-footer py-1 text-center {% if object.periodicity == 'Один/несколько дней в неделю' and not object.weekday %}bg-danger
+                                                    {% elif object.periodicity == 'Один/несколько дней в месяц' and not object.monthdate %}bg-danger
+                                                    {% elif not object.mail_dump %}bg-danger
+                                                    {% else %}bg-success
+                                                    {% endif %}">
+                    <span class="text-light">
+                        <strong>{% if object.status == 'Завершена' %}Рассылка завершена
+                                {% elif object.periodicity == 'Один/несколько дней в неделю' and not object.weekdays %} Добавьте дни недели рассылки!
+                                {% elif object.periodicity == 'Один/несколько дней в месяц' and not object.monthdates %} Добавьте даты месяца рассылки!
+                                {% elif not object.mail_dump %} Загрузите базу мейлов! {% else %} Готово к работе! <br> Email: {{ object.from_email }}
+                                    <a class="update-mailing-detail" style="text-decoration: underline" href="{% url 'sender:update_mailing' object.pk %}">Изменить email</a>
+                                {% endif %}</strong></span>
+                </div>
+                {% if object.status == 'Завершена' %}
+                <div class="card-footer bg-success text-center border-0 pt-0">
+                    <a class="btn btn-outline-light" href="{% url 'sender:restart_mailing' object.pk %}"><strong>Перезапустить</strong></a>
+                </div>
+                {% endif %}
+             </div>
+         </div>
+        <div class="col-lg-8 col-xl-9 col-md-12 col-sm-12">
+            <div class="card border-0 mb-5">
+                <div class="card-header text-center" style="display: flex;">
+                    {% if not letters %}
+                    <h5 class="text-center mt-lg-2 mt-md-2">Пока нет писем, создайте их</h5>
+                    {% endif %}
+                    {% if letters %}
+                    <div class="mt-3" style="margin-right: auto">
+                        <strong><span>Писем: {% count_obj letters %}</span></strong>
+                    </div>
+                    {% endif %}
+                    <a style="margin-left: auto" class="p-1 btn btn-outline-success w-50 my-2" href="{% url 'sender:create_letter' object.pk %}">
+                        <strong>Создать новое письмо</strong>
+                    </a>
+                </div>
+              <div class="card-body px-0 py-0">
+                <table class="table table-info">
+                    {% if letters %}
+                    <thead>
+                        <tr>
+                            <th class="col-3" scope="col">Тема</th>
+                            <th class="col-6" scope="col">Содержание письма</th>
+                            <th class="col-3" scope="col">Статус</th>
+                            <th class="col-1" scope="col"></th>
+                        </tr>
+                    </thead>
+                    {% endif %}
+                    <tbody>
+                    {% for letter in letters %}
+                        <tr class="{% if letter.status == 'Ожидает отправки' %}table-light
+                                {% elif letter.status == 'Отправлено'  %}table-success
+                                {% endif %}">
+                            <td>{{ letter.title }}</td>
+                            <td>{{ letter.content|truncatechars:200 }}</td>
+                            <td>{{ letter.status }}. Очередь: <strong># {{ letter.position|cutlastchar }}</strong></td>
+                            <td>
+                                <a href="{{ letter.get_absolute_url }}">
+                                    <img class="mb-2" src="{% static "img/update.png" %}" title="Редактировать письмо">
+                                </a>
+                                <a href="{% url 'sender:delete_letter' object.pk letter.pk %}">
+                                    <img src="{% static "img/delete.png" %}" title="Удалить письмо">
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+              </div>
+            </div>
+        </div>
+    </div>
+</div>
+

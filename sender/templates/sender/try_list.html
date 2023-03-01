@@ -1,0 +1,44 @@
+{% extends 'sender/base.html' %}
+
+{% block content %}
+    {% load static %}
+
+{% if not object_list %}
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <div class="row">
+        <div class="col-lg-3 col-md-12 col-sm-12">
+        </div>
+        <div class="col-lg-6 col-md-12 col-sm-12">
+            <p class="lead"><strong>Здесь Вы можете отслеживать, <br>насколько успешно происходят Ваши рассылки</strong></p>
+                <p class="lead"><strong>У Вас пока нет запущенных рассылок.</strong></p>
+
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="container my-5">
+    <div class="row d-flex justify-content-center">
+    {% for object in object_list %}
+        <div class="col-lg-3 col-md-6 col-sm-12 col-12">
+            <div class="card mx-2 border-{% if object.mail_server_respond == 'Письмо успешно отправлено' %}success{% else %}danger{% endif %}">
+                <div class="card-header text-center bg-success">
+                    <h4 class="my-0 font-weight-normal text-white">{{ object.mailing.title }}</h4>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-subtitle">Письмо: {{ object.letter.title }}</h6>
+                    <p class="card-text">Дата и время последней попытки: {{ object.date_time_try }}</p>
+                    <div class="card-text">
+                        <p>Количество попыток: {{ object.count_try }}</p>
+                    </div>
+                    <div class="card-text">
+                        <p>Отвечет почтового сервера: "{{ object.mail_server_respond }}"</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

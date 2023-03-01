@@ -1,0 +1,44 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Мои рассылки</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+    {% include 'sender/includes/main_menu.html' %}
+
+{% block content %}
+{% endblock %}
+
+<footer class="pt-4 px-4 border-top bg-success mt-auto">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 col-md">
+                <span class="text-light">VDchimp</span>
+                <small class="text-light d-block mb-3">&copy; 2023</small>
+            </div>
+            <div class="col-6 col-md">
+                <h5 class="text-light">Дополнительно</h5>
+                <ul class="list-unstyled text-small">
+                    <li><a class="link-light" href="#">Мы пишем</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-md">
+                <h5 class="text-light">О нас</h5>
+                <ul class="list-unstyled text-small">
+                    <li><a class="link-light" href="#">Контакты</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="{% static 'js/bootstrap.js' %}"></script>
+
+</body>
+</html>

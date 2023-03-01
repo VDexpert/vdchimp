@@ -1,0 +1,82 @@
+{% extends 'sender/base.html' %}
+
+{% block content %}
+    {% load static %}
+    {% load sender_tags %}
+    {% load sender_filters %}
+
+<div class="container position-relative form-imitation-popup-parent mx-0 py-0">
+         <div class="card card-form-popup mb-5 box-shadow text-center border-dark border-2 mx-2">
+            <div class="card-header bg-success px-0 border-0" style="display: flex;">
+                <h4 style="flex-grow: 1" class="text-light my-0 font-weight-normal">Редактирование рассылки</h4>
+                <a style="margin-left: auto;" href="{% url 'sender:mailing_detail' object.pk %}">
+                    <img src="{% static 'img/close.png' %}">
+                </a>
+            </div>
+         <form class="form-container" method="post" enctype="multipart/form-data">
+            <div class="card-body">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="id_title">{{ form.from_email.label }}</label>
+                    <input type="text" value="{{ object.from_email }}" class="form-control form-control-sm" name="title" maxlength="200" required="" id="id_title">
+                    <div class="form-error text-danger">{{  form.from_email.errors|format_err }}</div>
+                    <span class="help-text">почта для рассылки должна быть почтой для домена вашего сайта</span>
+                </div>
+                <div class="mb-3">
+                    <div class="row">
+                        <div class="col-6">
+                            <label for="id_hour">Час</label>
+                            <select name="hour" class="form-control form-control-sm" id="id_hour">
+                            <option value="{{ object.hour }}" selected="">{{ object.hour }}</option>
+                            {% for hour in hours %}
+                            <option value="{{ hour }}">{{ hour }}</option>
+                            {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label for="id_minute">Минуты</label>
+                            <select name="minute" class="form-control form-control-sm" id="id_minute">
+                                <option value="{{ object.minute }}">{% if object.minute < 10 %}0{{ object.minute }}
+                                                                    {% else %}{{ object.minute }}{% endif %}</option>
+                                {% for minute in minutes %}
+                                <option value="{{ minute }}">{% if minute < 10 %}0{{ minute }}
+                                                                {% else %}{{ minute }}{% endif %}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                   <div class="form-error text-danger">{{  form.hour.errors | format_err }}</div>
+                    <div class="form-error text-danger">{{  form.minute.errors | format_err }}</div>
+                    </div>
+                <div class="mb-3">
+                    <label for="id_periodicity">{{ form.periodicity.label }}</label>
+                        <select name="periodicity" class="form-control form-control-sm" id="id_periodicity">
+                            <option value="{{ object.periodicity }}" selected="">{{ object.periodicity }}</option>
+                            {% for period in periods %}
+                                {% if object.periodicity != period %}
+                                <option value="{{ period|cut:"'" }}">{{ period|cut:"'" }}</option>
+                                {% endif %}
+                            {% endfor %}
+                    </select>
+                    <div class="form-error text-danger">{{  form.periodicity.errors | format_err }}</div>
+                </div>
+                <div class="mb-3">
+                    <label for="id_mail_dump">{{ form.mail_dump.label }}</label>
+                    <input type="file" value="{{ object.mail_dump }}"  class="form-control form-control-sm" name="mail_dump" id="id_mail_dump">
+                    {% if object.mail_dump %}
+                    <p>На данный момент: <a href="{{ object.mail_dump }}">{{ object.mail_dump }}</a></p>
+                    <input type="checkbox" name="mail_dump-clear" id="mail_dump-clear_id">
+                    <label for="mail_dump-clear_id">Очистить базу рассылки</label>
+                    {%  endif %}
+                    <div class="form-error text-danger">{{  form.maildump.errors | format_err }}
+                    </div>
+                </div>
+                    <button type="submit" class="btn btn-outline-primary w-50 mb-3"><strong>Сохранить</strong></button>
+                </div>
+            </form>
+     </div>
+</div>
+
+{% include 'sender/includes/mailing_detail_for_mailing_generic.html' %}
+
+{% endblock %}
