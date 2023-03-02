@@ -17,6 +17,7 @@ monthdate_input_list = [str(x) for x in range(1, 32)]
 hours_list = [x for x in range(0, 24)]
 minutes_list = [x for x in range(0, 60)]
 
+
 class RegisterUser(CreateView):
     form_class = RegisterUserForm
     template_name = 'sender/registration.html'
@@ -76,8 +77,6 @@ class ListAndCreateConfigMailing(CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["object_list"] = self.model.objects.all().filter(user=self.request.user.pk)
-        context['hours'] = hours_list
-        context['minutes'] = minutes_list
         context['user'] = self.request.user
         context['periods'] = ConfigMailing.PERIODS_TUPLE
 
@@ -86,8 +85,8 @@ class ListAndCreateConfigMailing(CreateView):
 
 class ConfigMailingUpdateView(UpdateView):
     model = ConfigMailing
-    fields = ('from_email', 'hour', 'minute', 'periodicity', 'mail_dump')
-    template_name = 'sender/mailing_update.html'
+    fields = ('title', 'from_email', 'hour', 'minute', 'periodicity', 'mail_dump')
+    template_name = 'sender/mailing_form.html'
 
     def form_valid(self, form):
         self.object = form.save()
@@ -111,9 +110,8 @@ class ConfigMailingUpdateView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['hours'] = hours_list
-        context['minutes'] = minutes_list
         context['letters'] = LetterMailing.objects.all().filter(user=self.request.user.pk, mailing=self.get_object().pk)
+        context['sent_letters_count'] = LetterMailing.objects.all().filter(user=self.request.user.pk, mailing=self.get_object().pk, status=LetterMailing.SENT).count()
         context['periods'] = ConfigMailing.PERIODS_TUPLE
 
         return context
@@ -160,9 +158,9 @@ class WeekdayUpdateConfigMailingDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['letters'] = LetterMailing.objects.all().filter(user=self.request.user.pk, mailing=self.get_object().pk)
-        context['periods'] = ConfigMailing.PERIODS_TUPLE
         context['form'] = self.form
+        context['letters'] = LetterMailing.objects.all().filter(user=self.request.user.pk, mailing=self.get_object().pk)
+        context['sent_letters_count'] = LetterMailing.objects.all().filter(user=self.request.user.pk, mailing=self.get_object().pk, status=LetterMailing.SENT).count()
 
         return context
 
@@ -173,7 +171,6 @@ class MonthdateUpdateConfigMailingDetailView(DetailView):
     form = UpdateMonthdateForm()
 
     def post(self, form, pk):
-        print('\nform', form.POST)
         mailing = ConfigMailing.objects.all().get(id=pk)
 
         monthdates = []
@@ -207,8 +204,6 @@ class MonthdateUpdateConfigMailingDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['letters'] = LetterMailing.objects.all().filter(user=self.request.user.pk, mailing=self.get_object().pk)
-        context['periods'] = ConfigMailing.PERIODS_TUPLE
         context['form'] = self.form
 
         return context
@@ -221,7 +216,6 @@ class ConfigMailingDeleteView(DeleteView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['letters'] = LetterMailing.objects.all().filter(user=self.request.user.pk, mailing=self.get_object().pk).order_by('position')
 
         return context
 
@@ -242,6 +236,16 @@ class ConfigMailingDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context['trials'] = TryMailing.objects.all().filter(user=self.request.user.pk)
         context['letters'] = LetterMailing.objects.all().filter(user=self.request.user.pk, mailing=self.get_object().pk).order_by('position')
+        context['sent_letters_count'] = LetterMailing.objects.all().filter(user=self.request.user.pk, mailing=self.get_object().pk, status=LetterMailing.SENT).count()
+        context['status_mailing_done'] = ConfigMailing.DONE
+        context['status_mailing_moderating'] = ConfigMailing.MODERATING
+        context['period_mailing_month'] = ConfigMailing.PERIOD_MONTH
+        context['period_mailing_week'] = ConfigMailing.PERIOD_WEEK
+        context['status_letter_sent'] = LetterMailing.SENT
+        context['status_letter_wait'] = LetterMailing.WAIT
+        context['periods'] = ConfigMailing.PERIODS_TUPLE
+        context['hours'] = hours_list
+        context['minutes'] = minutes_list
 
         return context
 
@@ -258,41 +262,46 @@ class RestartConfigMailingDetailView(DetailView):
 
         return super().render_to_response(context)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['trials'] = TryMailing.objects.all().filter(user=self.request.user.pk)
-        context['letters'] = LetterMailing.objects.all().filter(user=self.request.user.pk, mailing=self.get_object().pk).order_by('position')
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     context['trials'] = TryMailing.objects.all().filter(user=self.request.user.pk)
+    #     context['letters'] = LetterMailing.objects.all().filter(user=self.request.user.pk, mailing=self.get_object().pk).order_by('position')
+    #     context['sent_letters_count'] = LetterMailing.objects.all().filter(user=self.request.user.pk, mailing=self.get_object().pk, status=LetterMailing.SENT).count()
+    #     context.update(get_static_context())
+    #
+    #     return context
 
-        return context
 
-
-class LetterCreateViewWithConfigMailingDetailView(DetailView):
+class LetterMailingCreateView(CreateView):
     model = ConfigMailing
     form = LetterCreateForm()
-    template_name = 'sender/letter_create.html'
+    template_name = 'sender/letter_form.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['letters'] = LetterMailing.objects.all().filter(user=self.request.user, mailing=self.get_object())
         context['form'] = self.form
+        context['mailing'] = self.object
+        # context['sent_letters_count'] = LetterMailing.objects.all().filter(user=self.request.user.pk, mailing=self.get_object().pk, status=LetterMailing.SENT).count()
+        # context['letters'] = LetterMailing.objects.all().filter(user=self.request.user, mailing=self.get_object()).order_by('position')
+        # context.update(get_static_context())
 
         return context
 
-    def post(self, form, pk):
-        LetterMailing.objects.create(
-            user=self.request.user,
-            mailing=self.get_object(),
-            title=form.POST['title'],
-            content=form.POST['content'],
-            position=form.POST['position']
-        )
-        return HttpResponseRedirect(self.get_object().get_absolute_url())
+    # def post(self, form, pk):
+    #     LetterMailing.objects.create(
+    #         user=self.request.user,
+    #         mailing=self.get_object(),
+    #         title=form.POST['title'],
+    #         content=form.POST['content'],
+    #         position=form.POST['position']
+    #     )
+    #     return HttpResponseRedirect(self.get_object().get_absolute_url())
 
 
 class LetterMailingUpdateView(UpdateView):
     model = LetterMailing
     form_class = LetterUpdateForm
-    template_name = 'sender/letter_update.html'
+    template_name = 'sender/letter_form.html'
     pk_url_kwarg = 'letter_pk'
 
     def get_success_url(self):
@@ -301,7 +310,7 @@ class LetterMailingUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['mailing'] = ConfigMailing.objects.all().get(id=self.get_object().mailing.pk)
-        context['letters'] = LetterMailing.objects.all().filter(user=self.request.user)
+        context['letter_exist'] = True
 
         return context
 
@@ -317,7 +326,6 @@ class LetterMailingDeleteView(DeleteView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['mailing'] = ConfigMailing.objects.all().get(id=self.get_object().mailing.pk)
-        context['letters'] = LetterMailing.objects.all().filter(user=self.request.user, mailing=self.get_object().mailing.pk).order_by('position')
 
         return context
 

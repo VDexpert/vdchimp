@@ -1,8 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
 from sender.forms_mixin import StyleFormMixin
-from sender.models import User, LetterMailing, ConfigMailing
-from tkinter import Button
+from sender.models import User, LetterMailing
 
 
 class RegisterUserForm(StyleFormMixin, UserCreationForm):
@@ -23,7 +22,7 @@ class LetterUpdateForm(StyleFormMixin, forms.ModelForm):
 
     class Meta:
         model = LetterMailing
-        exclude = ('user', 'mailing', 'status')
+        fields = ('title', 'position', 'content')
 
 
 class UpdateWeekdayForm(StyleFormMixin, forms.Form):

@@ -30,7 +30,6 @@
 .form-imitation-popup {
   bottom: 0;
   overflow-x: hidden;
-
 }
 
 .card-form-popup {
@@ -110,6 +109,10 @@ span.help-text {
   background-color: #f8d7da;
 }
 
+.td-table-success {
+  background-color: #d1e7dd;
+}
+
 .icon-update-cron {
   top: 0;
   text-decoration: unset;
@@ -125,4 +128,32 @@ span.help-text {
   text-decoration: unset;
 }
 
+.option-filter:hover {
+  background-color: #d1e7dd;
+  cursor: default;
+}
+
+.filter-letter {
+  position: absolute;
+  max-width: 200px;
+  display: none;
+  z-index: 9
+}
+
+.close-form {
+  cursor: pointer;
+}
+
+.filter-icon:hover {
+  cursor: pointer;
+}
+
+span.helptext {
+  font-size: small;
+  color: red;
+}
+
+.delete-form {
+ max-width: 350px;
+}
 

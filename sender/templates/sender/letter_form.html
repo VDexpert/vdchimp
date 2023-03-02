@@ -1,0 +1,32 @@
+{% extends 'sender/base.html' %}
+
+{% block content %}
+    {% load static %}
+    {% load sender_tags %}
+    {% load sender_filters %}
+
+<div class="container my-5 d-flex justify-content-center">
+    <div class="card box-shadow border-dark border-2 mx-2">
+        <div class="card-header bg-success px-0 border-0" style="display: flex;">
+            <h4 style="flex-grow: 1" class="text-light my-0 font-weight-normal">
+                &nbsp;&nbsp;&nbsp;{% if letter_exist %}Редактирование письма{% else %}Создание письма{% endif %}</h4>
+            <a style="margin-left: auto;" href="{% url 'sender:mailing_detail' mailing.pk %}">
+                <img src="{% static 'img/close.png' %}">
+            </a>
+        </div>
+        <form method="post" enctype="multipart/form-data">
+            <div class="card-body">
+                {% csrf_token %}
+                    <input type="hidden" name="position" id="id_position" value="{% get_position letters %}">
+                {{ form.as_p }}
+             </div>
+            <div class="card-footer bg-transparent border-0 px-0 mb-3">
+                <button type="submit" class="mx-3 btn btn-lg btn-block btn-outline-success px-5">
+                    <strong>Сохранить</strong>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

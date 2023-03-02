@@ -18,6 +18,7 @@ def format_err(error, autoescape=False):
     result = error.replace('рассылки', '').replace('Название', 'названием')
     return mark_safe(esc(result))
 
+
 @register.filter(needs_autoescape=True)
 @stringfilter
 def cutlastchar(text, autoescape=True):
@@ -34,6 +35,7 @@ def cutlastchar(text, autoescape=True):
 @register.filter
 def create_range(value, start_index=0):
     return range(start_index, value+start_index)
+
 
 @register.filter
 def translatefield(field):
@@ -67,3 +69,32 @@ def checkmonthdate(field, mailing):
 @register.filter
 def cutfieldfornum(field):
     return str(field).split('_')[1]
+
+
+@register.filter(needs_autoescape=True)
+def checkuseragenttablet(user_agent, autoescape=True):
+    target_agent = ['ipad', 'tablet', 'tab', 'pad']
+
+    if autoescape:
+        esc = conditional_escape
+    else:
+        esc = lambda x: x
+
+    return True if len([x for x in target_agent if re.findall(x, esc(user_agent.lower()))]) else False
+
+
+@register.filter(needs_autoescape=True)
+def checkuseragentphone(user_agent, autoescape=True):
+    target_agent = ['iphone', 'mobile', 'phone']
+
+    if autoescape:
+        esc = conditional_escape
+    else:
+        esc = lambda x: x
+
+    return True if len([x for x in target_agent if re.findall(x, esc(user_agent.lower()))]) else False
+
+
+@register.filter
+def calcposition(loop_count, sent_letters_count):
+    return loop_count - sent_letters_count

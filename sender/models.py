@@ -26,13 +26,15 @@ class User(AbstractUser):
 class ConfigMailing(models.Model):
     count = 1
 
-    STATUS_DONE = 'Завершена'
-    STATUS_CREATED = 'Создана'
-    STATUS_STARTED = 'Запущена'
+    DONE = 'Завершена'
+    CREATED = 'Создана'
+    STARTED = 'Запущена'
+    MODERATING = 'Ожидает модерации'
     STATUSES = (
-        (STATUS_DONE, 'Завершена'),
-        (STATUS_CREATED, 'Создана'),
-        (STATUS_STARTED, 'Запущена')
+        (DONE, 'Завершена'),
+        (CREATED, 'Создана'),
+        (STARTED, 'Запущена'),
+        (MODERATING, 'Ожидает модерации')
     )
 
     PERIOD_DAY = 'Каждый день'
@@ -46,12 +48,12 @@ class ConfigMailing(models.Model):
     PERIODS_TUPLE = ('Каждый день', 'Один/несколько дней в неделю', 'Один/несколько дней в месяц')
 
     user = models.ForeignKey('User', verbose_name='Клиент', on_delete=models.CASCADE, **NULLABLE)
-    title = models.CharField(verbose_name='Название рассылки', max_length=100)
+    title = models.CharField(verbose_name='Название рассылки', max_length=100, help_text='максимальное количество символов - 100')
     hour = models.IntegerField(verbose_name='Час', default=12)
     minute = models.IntegerField(verbose_name='Минуты', default=0)
     periodicity = models.CharField(choices=PERIODS, default=PERIOD_DAY, max_length=40, verbose_name='График')
     mail_dump = models.FileField(verbose_name='База рассылки в формате .txt', upload_to=f'maildumps/{count}/', **NULLABLE)
-    status = models.CharField(choices=STATUSES, default=STATUS_CREATED, max_length=20, verbose_name='Статус')
+    status = models.CharField(choices=STATUSES, default=CREATED, max_length=20, verbose_name='Статус')
     weekdays = models.CharField(verbose_name='Дни недели cron-формат', max_length=20, **NULLABLE)
     weekdays_text = models.CharField(verbose_name='Дни недели текст', max_length=100, **NULLABLE)
     monthdates = models.CharField(verbose_name='Дни месяца cron-формат', max_length=100, **NULLABLE)
@@ -75,19 +77,19 @@ class ConfigMailing(models.Model):
 
 
 class LetterMailing(models.Model):
-    STATUS_SENT = 'Отправлено'
-    STATUS_WAIT = 'Ожидает отправки'
+    SENT = 'Отправлено'
+    WAIT = 'В ожидании'
     STATUSES = (
-        (STATUS_SENT, 'Отправлено'),
-        (STATUS_WAIT, 'Ожидает отправки')
+        (SENT, 'Отправлено'),
+        (WAIT, 'Ожидает отправки')
     )
 
     user = models.ForeignKey('User', verbose_name='Логин клиента', on_delete=models.CASCADE, **NULLABLE)
     mailing = models.ForeignKey('ConfigMailing', verbose_name='Рассылка', on_delete=models.CASCADE)
-    title = models.CharField(verbose_name='Тема письма', max_length=50, null=False)
+    title = models.CharField(verbose_name='Тема письма', max_length=50, null=False, help_text='максимальное количество символов - 50')
     content = models.TextField(verbose_name='Содержание письма', null=False)
     position = models.PositiveIntegerField(verbose_name='Очередь на отправку', **NULLABLE, validators=[MinValueValidator(10), MaxValueValidator(5000000)])
-    status = models.CharField(verbose_name='Статус отправки', choices=STATUSES, default=STATUS_WAIT, max_length=20)
+    status = models.CharField(verbose_name='Статус отправки', choices=STATUSES, default=WAIT, max_length=20)
 
     def __hash__(self):
         return hash(self.pk)

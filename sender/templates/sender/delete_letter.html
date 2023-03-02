@@ -4,21 +4,23 @@
     {% load static %}
     {% load sender_tags %}
     {% load sender_filters %}
+    {% load user_agents %}
 
 
-<div class="container position-relative form-imitation-popup-parent mx-0 py-0">
-    <div class="card card-form-popup mb-5 box-shadow text-center border-dark border-2">
+<div class="container position-relative form-imitation-popup-parent mx-0 py-0 mb-5">
+    <div class="card my-5 box-shadow text-center border-dark border-2 delete-form">
         <div class="card-header bg-success px-0 border-0" style="display: flex;">
             <h4 style="flex-grow: 1" class="text-light my-0 font-weight-normal">Удаление письма</h4>
             <a style="margin-left: auto;" href="{% url 'sender:mailing_detail' object.mailing.pk %}">
-                <img src="{% static 'img/close.png' %}"></a>
+                <img src="{% static 'img/close.png' %}">
+            </a>
         </div>
     <form class="form-container" method="post" enctype="multipart/form-data">
         <div class="card-body">
             {% csrf_token %}
             {{ form.as_p }}
-            <p>Вы действительно хотите удалить письмо</p>
-        <p><strong>"{{ object.title }}"?</strong> Отменить удаление будет невозможно!</p>
+            <span>Вы действительно хотите удалить письмо</span>
+        <span><strong>"{{ object.title }}"</strong>?<br>Отменить удаление будет невозможно!</span>
         </div>
         <div class="card-footer bg-transparent border-0 mb-2 px-3">
             <div class="row">
@@ -35,6 +37,6 @@
         </form>
     </div>
 </div>
-{% include 'sender/includes/mailing_detail_for_letter_generic.html' %}
+
 
 {% endblock %}
