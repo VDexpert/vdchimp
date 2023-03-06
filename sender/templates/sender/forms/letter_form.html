@@ -3,12 +3,17 @@
 {% block content %}
     {% load static %}
     {% load sender_tags %}
-    {% load sender_filters %}
+
+<head>
+  <title>{% if letter_exist %}Редактирование письма{% else %}Создание письма{% endif %}</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+{{ form.media }}
+</head>
 
 <div class="container my-5 d-flex justify-content-center">
-    <div class="card box-shadow border-dark border-2 mx-2">
-        <div class="card-header bg-success px-0 border-0" style="display: flex;">
-            <h4 style="flex-grow: 1" class="text-light my-0 font-weight-normal">
+    <div class="card box-shadow border-dark mx-2 media-form">
+        <div class="card-header bg-warning px-0 border-0" style="display: flex;">
+            <h4 style="flex-grow: 1" class="text-dark my-0 font-weight-normal">
                 &nbsp;&nbsp;&nbsp;{% if letter_exist %}Редактирование письма{% else %}Создание письма{% endif %}</h4>
             <a style="margin-left: auto;" href="{% url 'sender:mailing_detail' mailing.pk %}">
                 <img src="{% static 'img/close.png' %}">

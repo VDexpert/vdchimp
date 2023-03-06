@@ -5,11 +5,16 @@
     {% load sender_tags %}
     {% load sender_filters %}
 
+<head>
+  <title>Редактирование дней недели рассылки</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
 
-<div class="container position-relative form-imitation-popup-parent mx-0 py-0">
-     <div class="card mb-5 box-shadow text-center border-dark border-2 px-0 my-5" style="max-width: 550px">
-            <div class="card-header bg-success px-0 border-0 card-header-form-popup">
-                <h4 class="text-light my-0 font-weight-normal header-text-form-popup">Дни недели рассылки</h4>
+<div class="container position-relative form-imitation-popup-parent py-0 px-0 mx-0">
+    {% include 'sender/includes/mailing_detail_for_mailing_generics.html' %}
+     <div class="card my-5 box-shadow card-form-popup text-center border-dark mx-3 px-0 my-5" style="max-width: 550px">
+            <div class="card-header bg-warning px-0 border-0 card-header-form-popup">
+                <h4 class="text-dark my-0 font-weight-normal header-text-form-popup">Дни недели рассылки</h4>
                 <a class="close-header-form-popup" href="{% url 'sender:mailing_detail' object.pk %}">
                     <img src="{% static 'img/close.png' %}"></a>
             </div>
@@ -21,7 +26,7 @@
             <div class="card-body my-0 mx-0 px-0">
                 <div class="input-group mx-0 px-0">
                     {% for field in form.fields %}
-                   <input type="text" id="id_{{ field }}" name="{% if field|checkweekday:object %}{{ field|translatefield }}{% else %}False{% endif %}" class="form-input btn my-1 mx-1" value="{{ field|translatefield }}"
+                   <input type="text" id="id_{{ field }}" readonly="" name="{% if field|checkweekday:object %}{{ field|translatefield }}{% else %}False{% endif %}" class="form-input btn my-1 mx-1" value="{{ field|translatefield }}"
                            onclick="changeValuesClick(this)" style="{% if field|checkweekday:object %}background-color: rgb(25, 135, 84);color: rgb(248, 249, 250);border-color: rgb(25, 135, 84);
                                                                     {% else %}background-color: rgb(248, 249, 250);color: rgb(0, 0, 0);border-color: rgb(0, 0, 0);
                                                                     {% endif %}border-radius: 20px;max-width: 135px">
@@ -47,27 +52,48 @@
  </div>
 
 <script>
+function openFilter() {document.getElementById("Filter").style.display = "block";}
+function closeFilter() {document.getElementById("Filter").style.display = "none";}
+function hideSentLetters() {
+    const elements = document.getElementsByClassName("card-letter")
+
+    for (const elem of elements) {
+        if (elem.title === 'SentLetter') {
+            elem.style.display = 'none'
+        }
+    }
+}
+function showSentLetters() {
+    const elements = document.getElementsByClassName("card-letter")
+
+    for (let elem of elements) {
+        if (elem.title === 'SentLetter') {
+            elem.style.display = 'block'
+        }
+    }
+}
+
 function changeValuesClick(input_selected) {
-    var inp_name = input_selected.name
-    var imp_value = input_selected.value
-    if (input_selected.style.backgroundColor === "rgb(248, 249, 250)"){
+    const inp_name = input_selected.name
+    const imp_value = input_selected.value
+    if (input_selected.style.backgroundColor === "rgb(248, 249, 250)") {
         input_selected.style.backgroundColor = "rgb(25, 135, 84)";
-    }else {
+    } else {
         input_selected.style.backgroundColor = "rgb(248, 249, 250)";
     }
-    if (input_selected.style.color === "rgb(0, 0, 0)"){
+    if (input_selected.style.color === "rgb(0, 0, 0)") {
         input_selected.style.color = "rgb(248, 249, 250)";
-    }else {
+    } else {
         input_selected.style.color = "rgb(0, 0, 0)";
     }
-    if (input_selected.style.borderColor === "rgb(0, 0, 0)"){
+    if (input_selected.style.borderColor === "rgb(0, 0, 0)") {
         input_selected.style.borderColor = "rgb(25, 135, 84)";
-    }else {
+    } else {
         input_selected.style.borderColor = "rgb(0, 0, 0)";
     }
-    if (inp_name === imp_value){
+    if (inp_name === imp_value) {
         input_selected.name = "False";
-    }else {
+    } else {
         input_selected.name = imp_value;
     }
 }

@@ -1,0 +1,38 @@
+{% extends 'catalog/base.html' %}
+
+{% block content %}
+
+<head>
+  <title>Удаление публикации</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+
+<div class="container d-flex justify-content-center">
+    <div class="card box-shadow border-dark mx-3 my-5 delete-form text-center">
+        <div class="card-header text-bg-warning py-1">
+        <h3>Удаление статьи</h3>
+    </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <p>Вы действительно хотите удалить публикацию '{{ object.title }}'? Отменить удаление будет невозможно!</p>
+               <div class="card-footer border-0 px-0 py-0 bg-transparent">
+                   <div class="row">
+                    <div class="col-6">
+                        <button class="btn btn-outline-danger w-100" type="submit">
+                            <strong>Удалить</strong>
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <a class="btn btn-primary w-100" href="{% url 'sender:content_management_posts' %}">
+                            <strong>Отмена</strong>
+                        </a>
+                    </div>
+                </div>
+               </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'sender/base.html' %}
+
+{% block content %}
+    {% load static %}
+    {% load sender_tags %}
+    {% load sender_filters %}
+
+<head>
+  <title>Создание рассылки</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+
+<div class="container position-relative py-0 my-5">
+{% include 'sender/forms/mailing_form.html' %}
+</div>
+
+{% endblock %}

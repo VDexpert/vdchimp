@@ -1,0 +1,66 @@
+{% extends 'sender/base.html' %}
+
+{% block content %}
+
+    {% load static %}
+
+<head>
+  <title>{{ blog.title }}</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="description" content="{{ blog.meta_description }}">
+</head>
+
+<div class="container px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <div class="row d-flex justify-content-center">
+        <div class="col-12">
+            <h1 class="display-4">{{ blog.blog_h1 }}</h1>
+        </div>
+        <div class="col-lg-6 col-xl-6 col-md-10 col-sm-12 col-12">
+            <p class="lead">{{ blog.blog_annotation }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="container d-flex justify-content-center">
+    <div class="card border-0 mb-2">
+        <div class="card-header border-0 bg-transparent">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-12">
+                    <h5><strong>Всего: {{ count_posts }}</strong></h5>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for object in object_list %}
+                <div class="col-lg-4 col-md-6 col-sm-12">
+                    <div class="card text-bg-dark border-warning mb-3">
+                        <div class="wrapper-post exmpl">
+                            <img  class="card-img bg-post-preview" src="{% if object.picture %}{{ object.picture.url }}
+                                                                    {% else %}{% static "img/post-no-image.jpg" %}
+                                                                    {% endif %}">
+                         </div>
+                         <a class="img-fluid" href="{% url 'sender:post_detail' object.slug %}">
+                             <div class="card-img-overlay post-white-link">
+                                 <h5 class="card-title">{{ object.title }}</h5>
+                                 <p>{{ object.create_at.date }}</p>
+                             </div>
+                         </a>
+                    </div>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'sender/includes/pagination.html' %}
+<div class="container mb-5 d-flex justify-content-center">
+    <div class="col-lg-8 col-md-12 col-sm-12">
+        {% if blog.description %}
+            {% autoescape off %}{{ blog.description }}{% endautoescape %}
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,173 @@
+{% extends 'sender/base.html' %}
+    {% load static %}
+    {% load user_agents %}
+    {% load sender_filters %}
+
+{% block content %}
+
+<div class="container my-5 justify-content-center d-flex">
+    <div class="col-lg-8 col-xl-7 col-md-12 col-sm-12 col-12">
+        <div class="card border-0">
+            <div class="card-header bg-transparent d-flex justify-content-center">
+                <div class="row">
+                    <div class="col-lg-8 col-md-7 col-sm-7 col-7">
+                        <input class="form-control" id="inputSearchUserCards" onclick="resetColor(this)" placeholder="Введите username" list="UserNames">
+                    </div>
+                    <div class="col-lg-3 col-md-4 col-sm-4 col-4 px-0">
+                        <div class="row">
+                            <div class="{% if request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}col-9{% else %}col-10{% endif %}">
+                                <button class="btn btn-outline-success" onclick="showSearchedUserCard()">
+                                {% if request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}
+                                    <strong>Фильтр</strong>
+                                {% else %}
+                                    <strong>Фильтровать</strong>
+                                {% endif %}
+                                </button>
+                            </div>
+                             <div class="{% if request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}col-3{% else %}col-2{% endif %}">
+                                <button type="button" class="filter-reset btn btn-primary mt-1 px-1 pb-1 py-0 h-75
+                                        {% if request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}mx-0{% else %}mx-3{% endif %}" onclick="showAllUserCards()">
+                                    <img src="{% static 'img/filter-reset.png' %}" title="Сбросить">
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-header px-0 td-table-info">
+                <div class="row td-table-info mb-0 mx-0 py-2">
+                {% if request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}
+                    <div class="col-6">
+                {% else %}
+                    <div class="col-4">
+                {% endif %}
+                        <strong>Username</strong>
+                    </div>
+                {% if request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}
+                     <div class="col-6">
+                {% else %}
+                    <div class="col-7">
+                {% endif %}
+                        <strong>Информация</strong>
+                    </div>
+                {% if request|is_pc or request|is_tablet or request.META.HTTP_USER_AGENT|checkuseragenttablet %}
+                    <div class="col-1">
+                    </div>
+                {% endif %}
+                </div>
+            </div>
+            <div class="card-body px-0 py-0">
+                {% for object in object_list %}
+                    {% if object|checkpermissions %}
+                    <div class="username-card card" title="{{ object.email|cutemail }}">
+                        <div class="card-body py-0 px-0">
+                            <div class="row my-0 mx-0 py-2{% if object.banned == ban_user_true %} td-table-danger
+                                                            {% else %} td-table-info{% endif %}">
+                            {% if request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}
+                                <div class="col-6">
+                            {% else %}
+                                <div class="col-4">
+                            {% endif %}
+                                    <img src="{% static 'img/user.png' %}"><strong> {{ object.email|cutemail }}</strong>
+                                    <br>{{ object.first_name }} {{ object.last_name }}
+                                    {% if request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}
+                                        <div class="row">
+                                            <div class="col-1 mx-2">
+                                                <a class="username-link-card float-start" href="{% url 'sender:moderating_user_comment' object.pk %}" title="Добавить комментарий">
+                                                    <img src="{% static 'img/comment.png' %}">
+                                                </a>
+                                            </div>
+                                            <div class="col-2">
+                                                <a class="username-link-card float-start" href="{% url 'sender:user_ban' object.pk %}">
+                                                {% if object.banned == ban_user_false %}
+                                                    <img src="{% static 'img/banned-on.png' %}" title="Забанить пользователя">
+                                                {% elif object.banned == ban_user_true %}
+                                                    <img src="{% static 'img/banned-off.png' %}" title="Разбанить пользователя">
+                                                {% endif %}
+                                            </a>
+                                            </div>
+                                         </div>
+                                    {% endif %}
+                                </div>
+                            {% if request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}
+                                <div class="col-6">
+                            {% else %}
+                                <div class="col-7">
+                            {% endif %}
+                                    <img class="info-register" src="{% static 'img/register.png' %}" title="Дата регистрации">
+                                    <span>{{ object.date_joined|datetostr }}&nbsp;&nbsp;&nbsp;</span>
+                                    Рассылок:&nbsp;<strong>{{ object|getcountmailings }}</strong>
+                                    {% if object.banned == ban_user_true %}
+                                        <br><strong>{{ object.banned  }}</strong>
+                                    {% endif %}
+                                    {% if object.comment %}
+                                        <br>{{ object.comment }}
+                                    {% endif %}
+                                </div>
+                             {% if request|is_pc or request|is_tablet or request.META.HTTP_USER_AGENT|checkuseragenttablet %}
+                                <div class="col-1">
+                                    <a class="username-link-card float-end" href="{% url 'sender:moderating_user_comment' object.pk %}" title="Добавить комментарий">
+                                        <img class="mb-2" src="{% static 'img/comment.png' %}">
+                                    </a>
+                                    <a class="username-link-card float-end" href="{% url 'sender:user_ban' object.pk %}">
+                                        {% if object.banned == ban_user_false %}
+                                            <img src="{% static 'img/banned-on.png' %}" title="Забанить пользователя">
+                                        {% elif object.banned == ban_user_true %}
+                                            <img src="{% static 'img/banned-off.png' %}" title="Разбанить пользователя">
+                                        {% endif %}
+                                    </a>
+                                </div>
+                             {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showSearchedUserCard() {
+    const username = document.getElementById("inputSearchUserCards").value.replace(/\s/g,'')
+    const divList = document.querySelectorAll('.username-card');
+    const titles = []
+    divList.forEach(el => {
+        titles.push(el.title);
+    })
+    if (titles.includes(username)) {
+        hideUserCards(username)
+    } else {
+        document.getElementById("inputSearchUserCards").value = 'Пользователь не существует';
+        document.getElementById("inputSearchUserCards").style.color = 'red';
+    }
+}
+
+function hideUserCards(username) {
+    const cards = Array.prototype.slice.call(document.getElementsByClassName('username-card'));
+
+    for (let card of cards) {
+        if (card.title === username) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    }
+}
+
+function resetColor(input) {
+    input.style.color = 'black'
+    input.value = null
+}
+
+function showAllUserCards() {
+    const cards = Array.prototype.slice.call(document.getElementsByClassName('username-card'));
+
+    for (let card of cards) {
+            card.style.display = 'block';
+        }
+}
+</script>
+
+{% endblock %}

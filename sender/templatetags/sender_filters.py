@@ -2,7 +2,10 @@ from django import template
 from django.template.defaultfilters import stringfilter
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
+from time import strftime
 import re
+
+from sender.models import ConfigMailing
 
 register = template.Library()
 
@@ -98,3 +101,24 @@ def checkuseragentphone(user_agent, autoescape=True):
 @register.filter
 def calcposition(loop_count, sent_letters_count):
     return loop_count - sent_letters_count
+
+
+@register.filter
+@stringfilter
+def cutemail(email):
+    return email.split('@')[0]
+
+
+@register.filter
+def getcountmailings(user):
+    return ConfigMailing.objects.all().filter(user=user).count()
+
+
+@register.filter
+def datetostr(date):
+    return date.strftime("%d %b %y")
+
+
+@register.filter
+def checkpermissions(user):
+    return True if not user.has_perm('sender.view_and_ban_any_mailing') and not user.has_perm('sender.view_and_ban_any_user') and not user.has_perm('sender.content_management') else False

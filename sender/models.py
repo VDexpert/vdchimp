@@ -1,10 +1,11 @@
-import os
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.urls import reverse_lazy
 from django.contrib.auth.models import AbstractUser
 from dotenv import load_dotenv
 from config.settings import BASE_DIR
+from tinymce import models as tinymce_models
+
 
 NULLABLE = {'blank': True, 'null': True}
 
@@ -13,39 +14,66 @@ load_dotenv(dotenv_path=env_path)
 
 
 class User(AbstractUser):
+    BANNED_TRUE = 'Заблокирован модератором'
+    BANNED_FALSE = 'Не заблокирован'
+    BANNED_STATUSES = (
+        (BANNED_TRUE, 'ЗАБЛОКИРОВАТЬ'),
+        (BANNED_FALSE, 'РАЗБЛОКИРОВАТЬ')
+    )
+
     username = None
     email = models.EmailField(verbose_name='Почта', unique=True)
     phone = models.CharField(verbose_name='Телефон', max_length=20, **NULLABLE)
     country = models.CharField(verbose_name='Страна', max_length=30, **NULLABLE)
     email_verify = models.BooleanField(default=False)
+    banned = models.CharField(choices=BANNED_STATUSES, default=BANNED_FALSE, max_length=30, verbose_name='Забанить пользователя?')
+    comment = models.CharField(verbose_name='Комментарий пользователю', **NULLABLE, max_length=100)
+    register_at = models.DateTimeField(verbose_name='Дата регистрации', auto_now_add=True, **NULLABLE)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
+
+    class Meta():
+        verbose_name = 'пользователь'
+        verbose_name_plural = 'пользователи'
+        permissions = [
+            ('view_and_ban_any_user', 'блокировать любого пользователя'),
+        ]
+
+    def get_absolute_url(self):
+        return reverse_lazy('sender:mailing_detail', kwargs={'pk': self.pk})
 
 
 class ConfigMailing(models.Model):
     count = 1
 
-    DONE = 'Завершена'
-    CREATED = 'Создана'
-    STARTED = 'Запущена'
-    MODERATING = 'Ожидает модерации'
+    STATUS_DONE = 'Завершена'
+    STATUS_CREATED = 'Создана'
+    STATUS_STARTED = 'Запущена'
+    STATUS_MODERATING = 'Ожидает модерации'
     STATUSES = (
-        (DONE, 'Завершена'),
-        (CREATED, 'Создана'),
-        (STARTED, 'Запущена'),
-        (MODERATING, 'Ожидает модерации')
+        (STATUS_DONE, 'Завершена'),
+        (STATUS_CREATED, 'Создана'),
+        (STATUS_STARTED, 'Запущена'),
+        (STATUS_MODERATING, 'Ожидает модерации')
     )
 
     PERIOD_DAY = 'Каждый день'
-    PERIOD_WEEK = 'Один/несколько дней в неделю'
-    PERIOD_MONTH = 'Один/несколько дней в месяц'
+    PERIOD_WEEK = 'Один или несколько дней в неделю'
+    PERIOD_MONTH = 'Один или несколько дней в месяц'
     PERIODS = (
         (PERIOD_DAY, 'Каждый день'),
-        (PERIOD_WEEK, 'Один/несколько дней в неделю'),
-        (PERIOD_MONTH, 'Один/несколько дней в месяц')
+        (PERIOD_WEEK, 'Один или несколько дней в неделю'),
+        (PERIOD_MONTH, 'Один или несколько дней в месяц')
     )
-    PERIODS_TUPLE = ('Каждый день', 'Один/несколько дней в неделю', 'Один/несколько дней в месяц')
+    PERIODS_TUPLE = ('Каждый день', 'Один или несколько дней в неделю', 'Один или несколько дней в месяц')
+
+    BANNED_TRUE = 'ЗАБЛОКИРОВАНО МОДЕРАТОРОМ'
+    BANNED_FALSE = 'одобрено модератором'
+    BANNED_STATUSES = (
+        (BANNED_TRUE, 'ЗАБАНИТЬ'),
+        (BANNED_FALSE, 'РАЗБАНИТЬ')
+    )
 
     user = models.ForeignKey('User', verbose_name='Клиент', on_delete=models.CASCADE, **NULLABLE)
     title = models.CharField(verbose_name='Название рассылки', max_length=100, help_text='максимальное количество символов - 100')
@@ -53,13 +81,16 @@ class ConfigMailing(models.Model):
     minute = models.IntegerField(verbose_name='Минуты', default=0)
     periodicity = models.CharField(choices=PERIODS, default=PERIOD_DAY, max_length=40, verbose_name='График')
     mail_dump = models.FileField(verbose_name='База рассылки в формате .txt', upload_to=f'maildumps/{count}/', **NULLABLE)
-    status = models.CharField(choices=STATUSES, default=CREATED, max_length=20, verbose_name='Статус')
+    status = models.CharField(choices=STATUSES, default=STATUS_CREATED, max_length=20, verbose_name='Статус')
     weekdays = models.CharField(verbose_name='Дни недели cron-формат', max_length=20, **NULLABLE)
     weekdays_text = models.CharField(verbose_name='Дни недели текст', max_length=100, **NULLABLE)
     monthdates = models.CharField(verbose_name='Дни месяца cron-формат', max_length=100, **NULLABLE)
     monthdates_text = models.CharField(verbose_name='Дни месяца с пробелами', max_length=100, **NULLABLE)
-    from_email = models.EmailField(verbose_name='Email рассылки', unique=False, default=os.getenv('EMAIL_HOST_USER'), **NULLABLE)
+    from_email = models.EmailField(verbose_name='Email рассылки', unique=False, **NULLABLE)
     password_user_from_email = models.CharField(max_length=300, verbose_name='Пароль от почты пользвоателя', **NULLABLE)
+    banned = models.CharField(choices=BANNED_STATUSES, default=BANNED_FALSE, max_length=30, verbose_name='Забанить пост?')
+    create_at = models.DateTimeField(verbose_name='Дата создания', auto_now_add=True, **NULLABLE)
+
 
     def __int__(self, *args, **kwargs):
         self.count += 1
@@ -74,22 +105,25 @@ class ConfigMailing(models.Model):
     class Meta():
         verbose_name = 'рассылка'
         verbose_name_plural = 'рассылки'
+        permissions = [
+            ('view_and_ban_any_mailing', 'блокировать любую рассылку'),
+        ]
 
 
 class LetterMailing(models.Model):
-    SENT = 'Отправлено'
-    WAIT = 'В ожидании'
+    STATUS_SENT = 'Отправлено'
+    STATUS_WAIT = 'В ожидании'
     STATUSES = (
-        (SENT, 'Отправлено'),
-        (WAIT, 'Ожидает отправки')
+        (STATUS_SENT, 'Отправлено'),
+        (STATUS_WAIT, 'Ожидает отправки')
     )
 
     user = models.ForeignKey('User', verbose_name='Логин клиента', on_delete=models.CASCADE, **NULLABLE)
     mailing = models.ForeignKey('ConfigMailing', verbose_name='Рассылка', on_delete=models.CASCADE)
     title = models.CharField(verbose_name='Тема письма', max_length=50, null=False, help_text='максимальное количество символов - 50')
-    content = models.TextField(verbose_name='Содержание письма', null=False)
+    content = tinymce_models.HTMLField(verbose_name='Содержание', **NULLABLE)
     position = models.PositiveIntegerField(verbose_name='Очередь на отправку', **NULLABLE, validators=[MinValueValidator(10), MaxValueValidator(5000000)])
-    status = models.CharField(verbose_name='Статус отправки', choices=STATUSES, default=WAIT, max_length=20)
+    status = models.CharField(verbose_name='Статус отправки', choices=STATUSES, default=STATUS_WAIT, max_length=20)
 
     def __hash__(self):
         return hash(self.pk)
@@ -131,3 +165,89 @@ class TryMailing(models.Model):
     class Meta():
         verbose_name = 'попытка'
         verbose_name_plural = 'попытки'
+
+
+class Home(models.Model):
+    home_h1 = models.CharField(max_length=100, verbose_name='Заголовок',  help_text='До 100 символов')
+    home_annotation = models.CharField(max_length=150, verbose_name='Аннотация', help_text='До 150 символов')
+    title = models.CharField(max_length=70, verbose_name='Метатэг Title', help_text='До 70 символов')
+    description = tinymce_models.HTMLField(verbose_name='Содержание', **NULLABLE)
+    meta_description = models.CharField(verbose_name='Метатэг description', max_length=300, **NULLABLE, help_text='До 300 символов')
+    meta_keywords = models.CharField(max_length=150, verbose_name='Метатег Keywords', **NULLABLE, help_text='До 150 символов')
+
+    class Meta():
+        verbose_name = 'Главная страница'
+        verbose_name_plural = 'Главная страница'
+
+
+class Blog(models.Model):
+    blog_h1 = models.CharField(max_length=100, verbose_name='Заголовок', **NULLABLE,  help_text='До 100 символов')
+    blog_annotation = models.CharField(max_length=150, verbose_name='Аннотация', **NULLABLE, help_text='До 150 символов')
+    title = models.CharField(max_length=70, verbose_name='Метатэг Title',  **NULLABLE,  help_text='До 70 символов')
+    description = tinymce_models.HTMLField(verbose_name='Содержание',  **NULLABLE)
+    meta_description = models.CharField(verbose_name='Метатэг Description', max_length=300, **NULLABLE, help_text='До 300 символов')
+    meta_keywords = models.CharField(max_length=150, verbose_name='Метатег Keywords', **NULLABLE, help_text='До 150 символов')
+
+    class Meta():
+        verbose_name = 'Блог'
+        verbose_name_plural = 'Блог'
+        permissions = [
+            ('content_management', 'Создавать статьи блога'),
+        ]
+
+
+class Contacts(models.Model):
+    contacts_h1 = models.CharField(max_length=100, verbose_name='Заголовок', **NULLABLE,  help_text='До 100 символов')
+    title = models.CharField(max_length=70, verbose_name='Метатэг Title', **NULLABLE,  help_text='До 70 символов')
+    official_company_name = models.CharField(max_length=30, verbose_name='Юридическое название', **NULLABLE,  help_text='До 30 символов')
+    country = models.CharField(max_length=20, verbose_name='Страна', **NULLABLE,  help_text='До 20 символов')
+    itin = models.CharField(max_length=20, verbose_name='ИНН', **NULLABLE,  help_text='До 20 символов')
+    address = models.CharField(max_length=50, verbose_name='Адрес', **NULLABLE,  help_text='До 50 символов')
+    phone = models.CharField(max_length=30, verbose_name='Телефон', **NULLABLE,  help_text='До 30 символов')
+    email = models.CharField(max_length=40, verbose_name='Email', **NULLABLE,  help_text='До 40 символов')
+    meta_description = models.CharField(verbose_name='Метатэг Description', max_length=300, **NULLABLE, help_text='До 300 символов')
+    meta_keywords = models.CharField(max_length=150, verbose_name='Метатег Keywords', **NULLABLE, help_text='До 150 символов')
+
+    class Meta():
+        verbose_name = 'Контакты'
+        verbose_name_plural = 'Контакты'
+
+
+class Post(models.Model):
+    STATUS_ACTIVE = 'опубликовано'
+    STATUS_INACTIVE = 'не опубликовано'
+    STATUSES = (
+        (STATUS_ACTIVE, 'ДА'),
+        (STATUS_INACTIVE, 'НЕТ')
+    )
+
+
+    user = models.ForeignKey(User, verbose_name='Автор (продавец)', on_delete=models.CASCADE, **NULLABLE)
+    title = models.CharField(max_length=100, verbose_name='Заголовок', db_index=True, unique=True,  help_text='До 100 символов')
+    slug = models.SlugField(max_length=100, verbose_name='URL',  db_index=True, unique=True, null=True)
+    content = tinymce_models.HTMLField(verbose_name='Содержание', **NULLABLE)
+    picture = models.ImageField(verbose_name='Фото', upload_to='posts/', **NULLABLE, help_text='рекомендуемый размер - 2000*1000')
+    create_at = models.DateTimeField(verbose_name='Дата создания', auto_now_add=True)
+    change_at = models.DateTimeField(verbose_name='Дата изменения', **NULLABLE)
+    count_views = models.IntegerField(default=0, verbose_name='Количество просмотров')
+    status = models.CharField(choices=STATUSES, default=STATUS_ACTIVE, max_length=20, verbose_name='Публиковать?')
+
+    class Meta():
+        verbose_name = 'публикация'
+        verbose_name_plural = 'публикации'
+
+    def __str__(self):
+        return f'{self.title},{self.slug}, {self.create_at}, {self.change_at}, {self.count_views}, {self.status}'
+
+    def get_absolute_url(self):
+        return reverse_lazy('sender:post_list', kwargs={'slug': self.slug})
+
+
+class Comment(models.Model):
+    name_user = models.CharField(max_length=50, verbose_name='Если хотите, укажите Ваще имя или псевдоним', default='Гость')
+    content = models.CharField(max_length=1000, verbose_name='Комментарий')
+    post = models.ForeignKey('Post', on_delete=models.CASCADE)
+
+    class Meta():
+        verbose_name = 'комментарий'
+        verbose_name_plural = 'комментарии'

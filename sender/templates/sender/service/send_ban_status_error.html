@@ -1,0 +1,24 @@
+{% extends 'sender/base.html' %}
+
+{% block content %}
+
+<div style="min-height:50vh" class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h3 class="display-4">Что-то пошло не так :(</h3>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 col-md-12 col-sm-12">
+            </div>
+            <div class="col-lg-6 col-md-12 col-sm-12">
+                <p class="lead">Возникла неизвестная ошибка и мы не смогли отправить пользователю письмо об изменении бан-статуса.
+                Уведомите об этом технического специалиста и он быстро разберется с этим. Бан-статус успешно обновлен, но Вам необходимо уведомить об этом пользователя.
+                Пожалуйста, напишите ему об этом на почту.</p>
+                <a class="p-2 btn btn-outline-success px-3" {% if perms.sender.view_and_ban_any_mailing %}href="{% url 'sender:moderating_mailings' %}"
+                                                            {% elif perms.sender.view_and_ban_any_user %}href="{% url 'sender:moderating_users' %}"{% endif %}>
+                    <strong>В личный кабинет</strong>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

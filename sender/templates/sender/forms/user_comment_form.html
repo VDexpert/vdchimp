@@ -1,0 +1,30 @@
+{% extends 'sender/base.html' %}
+{% load user_agents %}
+{% load sender_filters %}
+
+{% block content %}
+
+<head>
+  <title>Комментарий пользователю</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+
+<div class="container d-flex justify-content-center">
+    <div class="card my-5 box-shadow border-dark mx-3 user-comment-form text-center text-center">
+        <div class="card-header text-bg-warning">
+        <h3>Комментарий</h3>
+    </div>
+        <div class="card-body">
+            <p>Пользователь <strong>{{ object.email|cutemail }}</strong> не увидит Ваш комментарий - он нужен только для Ваших заметок</p>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button class="btn btn-outline-success mb-3 mt-4 {% if not request|is_mobile %}w-50{% else %}w-75{% endif %}" type="submit">
+                    <strong>Отправить</strong>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

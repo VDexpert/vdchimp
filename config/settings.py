@@ -152,7 +152,7 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_USE_SSL = True
 
-LOGIN_REDIRECT_URL = 'profile/'
+LOGIN_URL = 'profile/'
 LOGOUT_REDIRECT_URL = 'login/'
 AUTH_USER_MODEL = 'sender.User'
 

@@ -1,0 +1,87 @@
+{% extends 'sender/base.html' %}
+
+{% block content %}
+    {% load static %}
+    {% load user_agents %}
+
+    <head>
+      <title>Публикации</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    </head>
+
+{% if request|is_pc %}
+
+<div class="container d-flex justify-content-center">
+    <div class="row">
+        <div class="col-lg-9 col-md-12 col-12">
+            <div class="card border-0 mb-5 mt-5">
+                <div class="card-header td-table-info text-center px-0 py-0">
+                    <div class="col-lg-6 col-md-6 col-sm-12">
+                        <a class="p-1 btn btn-outline-dark w-75 my-2" href="{% url 'sender:create_post' %}">
+                            <strong>Добавить публикацию</strong>
+                        </a>
+                    </div>
+                     <div class="col-lg-6 col-md-6 col-sm-12">
+                        <a class="p-1 btn btn-outline-dark w-75 my-2" href="{% url 'sender:update_blog' %}">
+                            <strong>Редактировать 'Блог'</strong>
+                        </a>
+                    </div>
+                </div>
+            {% if object_list %}
+              <div class="card-body px-0 py-0">
+                <table class="table table-striped table-info mb-0">
+                        <thead>
+                            <tr class="text-center">
+                                <th class="col-4" scope="col">Заголовок</th>
+                                <th class="col-8" scope="col">Содержание</th>
+                                <th class="col-1" scope="col"></th>
+                            </tr>
+                        </thead>
+                    <tbody>
+                        {% for object in object_list %}
+                            <tr class="{% if object.status == inactive %}table-light
+                                       {% else %}table-info
+                                       {% endif %}">
+                                <td>
+                                    <a href="{% url 'sender:post_detail' object.pk %}">
+                                        <p>{{ object.title }}</p>
+                                    </a>
+                                    {% if object.status == inactive %}
+                                        <p class="text-danger"><strong>{{ object.status }}</strong></p>
+                                    {% endif %}
+                                </td>
+
+                                <td>{% autoescape off %}{{ object.content|truncatechars_html:200 }}{% endautoescape %}
+                                </td>
+
+                                <td>
+                                    <a class="img-fluid" href="{% url 'sender:update_post' object.pk %}">
+                                        <img class="mb-2" src="{% static "img/update.png" %}" title="Редактировать статью">
+                                    </a>
+                                    <a class="img-fluid" href="{% url 'sender:delete_post' object.pk %}">
+                                        <img src="{% static "img/delete.png" %}" title="Удалить статью">
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+              </div>
+            {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% elif request|is_tablet or request.META.HTTP_USER_AGENT|checkuseragenttablet %}
+
+
+
+{% elif request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}
+
+
+
+{% endif %}
+
+{% endblock %}

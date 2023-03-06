@@ -1,0 +1,44 @@
+{% extends 'sender/base.html' %}
+{% block content %}
+    {% load user_agents %}
+
+<head>
+  <title>Авторизация на сайте VDchimp</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+
+<div class="container d-flex justify-content-center">
+    <div class="card border-warning box-shadow text-center border-warning mx-3 my-5 login-register-reset-form">
+        <div class="card-header text-bg-warning py-1">
+            <h3>Авторизация</h3>
+        </div>
+        <div class="card-body mx-3 px-4">
+            <form method="post">
+                {% csrf_token %}
+                    <label class="form-label" for="id_username">{{ form.username.label }}</label>
+                    <input type="text" class="form-control form-control-sm mb-4" name="username" autofocus="" autocapitalize="none" autocomplete="email" maxlength="254" required="" id="id_username">
+                    <div class="form-error text-danger">{{  form.username.errors }}
+                    </div>
+
+                    <label class="form-label" for="id_password">Пароль: </label>
+                    <input type="password" class="form-control form-control-sm mb-4" name="password" autocomplete="current-password" required="" id="id_password">
+                   <div class="form-error text-danger">{{  form.password.errors }}
+                   </div>
+                <div class="card-footer border-0 px-0 py-0 bg-transparent">
+                    <button class="btn btn-outline-success mb-3 text-center w-75" type="submit">
+                        <strong>Авторизация</strong>
+                    </button>
+                    <p>У Вас нет аккаунта?
+                        <a class="link-primary" href="{% url 'sender:registration' %}">Регистрация
+                        </a><br>
+                    Забыли пароль?
+                        <a class="link-primary" href="#">Восстановить
+                        </a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

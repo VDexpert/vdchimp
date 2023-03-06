@@ -1,0 +1,14 @@
+{% extends 'sender/base.html' %}
+
+{% block content %}
+    {% load static %}
+    {% load sender_tags %}
+    {% load sender_filters %}
+    {% load user_agents %}
+
+<div class="container position-relative py-0">
+    {% include 'sender/includes/mailing_detail_for_mailing_generics.html' %}
+</div>
+
+
+{% endblock %}

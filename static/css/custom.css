@@ -2,10 +2,9 @@
   display: none;
 }
 
-.wrapper {
-  width: 300px;
-  height: 300px;
-  border: 5px solid #515151;
+.wrapper-post {
+  width: 100%;
+  height: 200px;
   align-items: center;
 }
 
@@ -17,23 +16,37 @@
 }
 
 .exmpl img {
-  height: 100%;
-  width: auto;
+  min-width: 100%;
+  min-height: 100%;
+  flex-shrink: 0;
+}
+
+.bg-post-preview {
+  filter: brightness(50%);
+}
+
+.post-white-link {
+    color: #ffffff;
+    text-decoration: unset;
+}
+
+.post-white-link:hover {
+    color: #ffc107;
 }
 
 .form-imitation-popup-parent {
   min-width: 100%;
   justify-content: center;
   display: flex;
+  height: 100%;
+  #background-color:rgb(58%, 53%, 22%, 0.5);;
 }
 
 .form-imitation-popup {
   bottom: 0;
-  overflow-x: hidden;
 }
 
 .card-form-popup {
-  margin: 45px 0 0 0;
   position: absolute;
   z-index: 9;
 }
@@ -48,11 +61,21 @@ a.update-mailing-profile:hover {
 }
 
 a.update-mailing-detail {
+  color: black;
+  text-decoration: underline;
+  pointer-events: auto;
+}
+
+a.update-mailing-detail:hover {
+  text-decoration: unset;
+}
+
+a.update-mailing-detail-white {
   color: white;
   text-decoration: underline;
 }
 
-a.update-mailing-detail:hover {
+a.update-mailing-detail-white:hover {
   text-decoration: unset;
 }
 
@@ -130,7 +153,7 @@ span.help-text {
 
 .option-filter:hover {
   background-color: #d1e7dd;
-  cursor: default;
+  cursor: pointer;
 }
 
 .filter-letter {
@@ -157,3 +180,101 @@ span.helptext {
  max-width: 350px;
 }
 
+input::placeholder {
+  font-size: smaller;
+}
+
+.card-letter {
+  border-radius: 0;
+}
+
+.card-letter[title] {
+  pointer-events: none;
+}
+
+.username-card {
+ border-radius: 0;
+}
+
+.username-card[title] {
+ pointer-events: none;
+}
+
+.username-link-card {
+  pointer-events: auto;
+}
+
+a.update-ban-link {
+  pointer-events: auto;
+}
+
+button.filter-reset {
+  border-radius: 5px;
+}
+
+a.add-mobile {
+  width: 65px;
+  height: 60px;
+  border-radius: 30px;
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+}
+
+.container-mailings {
+  min-height: 450px
+}
+
+.ban-form {
+  max-width: 450px;
+}
+
+.delete-form {
+  max-width: 400px;
+}
+
+.ban-form {
+    max-width: 450px;
+}
+
+.login-register-reset-form {
+    max-width: 400px;
+}
+
+.delete-form {
+  max-width: 360px;
+}
+
+.update-profile-form {
+    max-width: 450px;
+}
+
+.media-form {
+    max-width: 600px;
+}
+
+ul.errorlist li  {
+  color: red;
+}
+
+.username-list-link-card {
+  pointer-events: auto;
+  color: black;
+  text-decoration: underline;
+}
+
+.username-list-link-card:hover {
+  text-decoration: unset;
+}
+
+img.info-register {
+  pointer-events: auto;
+}
+
+.user-comment-form {
+  max-width: 300px;
+}
+
+.bg-post-preview {
+  filter: brightness(50%);
+}

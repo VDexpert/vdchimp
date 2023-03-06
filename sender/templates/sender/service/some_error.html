@@ -1,0 +1,21 @@
+{% extends 'sender/base.html' %}
+
+{% block content %}
+
+<div style="min-height:50vh" class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h3 class="display-4">Что-то пошло не так :(</h3>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 col-md-12 col-sm-12">
+            </div>
+            <div class="col-lg-6 col-md-12 col-sm-12">
+                <p class="lead">Возникла неизвестная ошибка и действие не смогло завершиться автоматически.
+                    Причина, возможно, в том, что у Вас в браузере наложен запрет на необходимые действия.
+                    Свяжитесь с нами любым способом из раздела "Контакты" и мы обязательно решим этот вопрос!</p>
+                <a class="p-2 btn btn-outline-success px-3" href="{% url 'sender:contacts' %}"><strong>На страницу 'Контакты'</strong></a><br>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

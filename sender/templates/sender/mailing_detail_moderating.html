@@ -1,0 +1,61 @@
+{% extends 'sender/base.html' %}
+
+{% block content %}
+    {% load static %}
+    {% load sender_tags %}
+    {% load sender_filters %}
+    {% load user_agents %}
+
+<div class="container position-relative py-0">
+    {% include 'sender/includes/mailing_detail_for_mailing_generics.html' %}
+</div>
+
+<script>
+function openFilter() {document.getElementById("Filter").style.display = "block";}
+function closeFilter() {document.getElementById("Filter").style.display = "none";}
+function hideSentLetters() {
+    let elements = document.getElementsByClassName("card-letter")
+
+    for (let elem of elements) {
+        if (elem.title === 'SentLetter') {
+            elem.style.display = 'none'
+        }
+    }
+}
+function showSentLetters() {
+    let elements = document.getElementsByClassName("card-letter")
+
+    for (let elem of elements) {
+        if (elem.title === 'SentLetter') {
+            elem.style.display = 'block'
+        }
+    }
+}
+
+function changeValuesClick(input_selected) {
+    var inp_name = input_selected.name
+    var imp_value = input_selected.value
+    if (input_selected.style.backgroundColor === "rgb(248, 249, 250)") {
+        input_selected.style.backgroundColor = "rgb(25, 135, 84)";
+    } else {
+        input_selected.style.backgroundColor = "rgb(248, 249, 250)";
+    }
+    if (input_selected.style.color === "rgb(0, 0, 0)") {
+        input_selected.style.color = "rgb(248, 249, 250)";
+    } else {
+        input_selected.style.color = "rgb(0, 0, 0)";
+    }
+    if (input_selected.style.borderColor === "rgb(0, 0, 0)") {
+        input_selected.style.borderColor = "rgb(25, 135, 84)";
+    } else {
+        input_selected.style.borderColor = "rgb(0, 0, 0)";
+    }
+    if (inp_name === imp_value) {
+        input_selected.name = "False";
+    } else {
+        input_selected.name = imp_value;
+    }
+}
+</script>
+
+{% endblock %}

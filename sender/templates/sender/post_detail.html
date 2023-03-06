@@ -1,0 +1,48 @@
+{% extends 'sender/base.html' %}
+
+    {% load static %}
+    {% load user_agents %}
+
+{% block content %}
+
+<head>
+  <title>{{ object.title|truncatechars:70 }}</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+
+<div class="container d-flex justify-content-center">
+    <div class="row d-flex justify-content-center">
+        <div class="col-lg-8 col-md-12 col-sm-12">
+            <div class="card border-0 mx-1 mt-lg-5 mt-5 mb-lg-5 mb-md-0 mb-3">
+                <img  class="card-img-top" src="{% if object.picture %}{{ object.picture.url }}
+                                                {% else %}{% static "img/post-no-image.jpg" %}
+                                                {% endif %}" alt="...">
+
+                <div class="card-body">
+                    <h1 class="card-title">{{ object.title|linebreaks }}</h1>
+                    <p class="card-text">
+                        <small class="text-muted">Дата публикации {{ object.create_at.date }}
+                        &nbsp;&nbsp;&nbsp;&nbsp;<img src="{% static 'img/eye.svg' %}">  {{ object.count_views }}
+                        </small>
+                    </p>
+                    {% if perms.sender.content_management %}
+                        <p class="card-text">
+                            <small class="text-muted">Изменено: {{ object.change_at }}</small>
+                        </p>
+                    {% endif %}
+                    <p class="card-text">{% autoescape off %}{{ object.content|linebreaks }}{% endautoescape %}
+                    </p>
+                </div>
+            </div>
+        </div>
+{#        <div class="col-lg-4 col-md-12 col-sm-12">#}
+{#            <div class="card mb-5 box-shadow text-center border-dark mx-1 mt-lg-5 mt-md-3">#}
+{#                <div class="card-header text-bg-warning py-1">#}
+{#                   <button class="btn btn-outline-primary"><strong>Комментировать</strong></button>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+    </div>
+</div>
+
+{% endblock %}

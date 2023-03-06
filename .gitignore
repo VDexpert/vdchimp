@@ -1,0 +1,5 @@
+/.env
+/sender/abs-variables/cronjobs.json
+/media/
+/log_cronjobs.txt
+/sender/python-experiments.py

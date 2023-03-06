@@ -2,57 +2,99 @@
 {% load static %}
 {% load sender_filters %}
 
-<nav class="navbar navbar-expand-lg navbar-light bg-success {% if not user.is_authenticated %}sticky-top{% endif %}">
+<nav class="navbar navbar-expand-lg navbar-light bg-warning {% if not user.is_authenticated %}sticky-top{% endif %}">
   <div class="container-fluid">
    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <a class="navbar-brand mx-2" href="#">
-        <img src="{% static "img/logo.png" %}" alt="Логотип Skychimp" title="VDchimp - smart mailing">
+        <img src="{% static "img/logo.png" %}" alt="Логотип VDchimp">
     </a>
    <div class="collapse navbar-collapse text-center" id="navbarTogglerDemo03">
      <ul class="main-menu-desktop navbar-nav me-auto">
             <li class="main-menu-desktop nav-item">
-              <a class="nav-link active" href="#">
-                  {% if request.path == '/blog/' %}
-                        <strong class="text-dark" style="align-self: center;">Блог</strong>
-                  {% else %}<span class="text-white">Блог</span>
+              <a class="nav-link active" href="{% url 'sender:post_list' %}">
+                  {% if request.path == '/blog' %}
+                        <strong class="text-primary" style="align-self: center;">Блог</strong>
+                  {% else %}<span class="text-dark">Блог</span>
                   {% endif %}
               </a>
+            </li>
+            {% if perms.sender.view_and_ban_any_user %}
+            <li class="main-menu-desktop nav-item">
+              <a class="nav-link active" href="{% url 'sender:moderating_users' %}">
+                  {% if request.path == '/user-list' %}
+                      <strong class="text-primary">Пользователи</strong>
+                  {% else %}<span class="text-dark">Пользователи</span>
+                  {% endif %}
+              </a>
+            </li>
+            {% endif %}
+            {% if perms.sender.view_and_ban_any_mailing %}
+            <li class="main-menu-desktop nav-item">
+              <a class="nav-link active" href="{% url 'sender:moderating_mailings' %}">
+                  {% if request.path == '/all-mailings' %}
+                      <strong class="text-primary">Все рассылки</strong>
+                  {% else %}<span class="text-dark">Все рассылки</span>
+                  {% endif %}
+              </a>
+            </li>
+            {% endif %}
+            {% if not perms.sender.content_management %}
+                {% if user.is_authenticated %}
+                <li class="main-menu-desktop nav-item">
+                  <a class="nav-link active" href="{% url 'sender:profile' %}">
+                      {% if request.path == '/my-mailings' %}
+                          <strong class="text-primary">Мои рассылки</strong>
+                      {% else %}<span class="text-dark">Мои рассылки</span>
+                      {% endif %}
+                  </a>
+                </li>
+                <li class="main-menu-desktop nav-item">
+                  <a class="nav-link active" href="{% url 'sender:trials' %}">
+                      {% if request.path == '/mail-server-responds' %}
+                          <strong class="text-primary">Отчеты</strong>
+                      {% else %}<span class="text-dark">Отчеты</span>
+                      {% endif %}
+                  </a>
+                </li>
+                {% endif %}
+            {% endif %}
+            {% if perms.sender.content_management %}
+                <li class="main-menu-desktop nav-item">
+                  <a class="nav-link active" href="{% url 'sender:content_management_posts' %}">
+                      {% if request.path == '/content-management-posts' %}
+                          <strong class="text-primary">Публикации</strong>
+                      {% else %}<span class="text-dark">Публикации</span>
+                      {% endif %}
+                  </a>
+                </li>
+            {% endif %}
+            <li class="main-menu-desktop nav-item">
+              <a class="nav-link active" href="{% url 'sender:contacts' %}">
+                  {% if request.path == '/contacts' %}
+                      <strong class="text-primary">Контакты</strong>
+                  {% else %}<span class="text-dark">Контакты</span>
+                  {% endif %}
+              </a>
+            </li>
+        {% if not user.is_authenticated %}
+            <li class="main-menu-desktop nav-item">
+              <a class="nav-link disabled" >{% getphone %}</a>
             </li>
             <li class="main-menu-desktop nav-item">
-              <a class="nav-link active" href="{% url 'sender:profile' %}">
-                  {% if request.path == '/profile/' %}
-                      <strong class="text-dark">Мои рассылки</strong>
-                  {% else %}<span class="text-white">Мои рассылки</span>
-                  {% endif %}
-              </a>
+              <a class="nav-link disabled" >{% getemail %}</a>
             </li>
-            <li class="main-menu-desktop nav-item">
-              <a class="nav-link active" href="{% url 'sender:trials' %}">
-                  {% if request.path == '/trials/' %}
-                      <strong class="text-dark">Отчеты рассылок</strong>
-                  {% else %}<span class="text-white">Отчеты рассылок</span>
-                  {% endif %}
-              </a>
-            </li>
-{#        {% if not user.is_authenticated %}#}
-{#            <li class="main-menu-desktop nav-item">#}
-{#              <a class="nav-link disabled" >{% getphone %}</a>#}
-{#            </li>#}
-{#        {% endif %}#}
-{#            <li class="main-menu-desktop nav-item">#}
-{#              <a class="nav-link disabled" >{% getemail %}</a>#}
-{#            </li>#}
         </ul>
+        {% endif %}
       <ul class="d-flex">
           {% if not user.is_authenticated %}
-            <a class="p-2 btn btn-outline-light w-30 float-end mt-2" href="{% url 'sender:login' %}">
-                <strong><span class="text-dark">Войти</span></strong>
+            <a class="p-2 btn btn-outline-dark w-30 float-end" href="{% url 'sender:login' %}">
+                <strong><span>Войти</span></strong>
             </a>
           {% else %}
-              <a class="p-2 btn btn-outline-light w-30 float-end mt-2" href="{% url 'sender:logout' %}">
-                  <strong><span class="text-dark">Выйти</span></strong>
+              <a class="p-2 btn btn-outline-dark w-30 float-end" href="{% url 'sender:logout' %}">
+                  <strong><span>Выйти</span></strong>
               </a>
           {% endif %}
       </ul>

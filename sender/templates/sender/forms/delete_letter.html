@@ -2,15 +2,17 @@
 
 {% block content %}
     {% load static %}
-    {% load sender_tags %}
-    {% load sender_filters %}
-    {% load user_agents %}
+
+<head>
+  <title>Удаление письма</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
 
 
-<div class="container position-relative form-imitation-popup-parent mx-0 py-0 mb-5">
+<div class="container d-flex justify-content-center">
     <div class="card my-5 box-shadow text-center border-dark border-2 delete-form">
-        <div class="card-header bg-success px-0 border-0" style="display: flex;">
-            <h4 style="flex-grow: 1" class="text-light my-0 font-weight-normal">Удаление письма</h4>
+        <div class="card-header bg-warning px-0 border-0" style="display: flex;">
+            <h4 style="flex-grow: 1" class="text-dark my-0 font-weight-normal">Удаление письма</h4>
             <a style="margin-left: auto;" href="{% url 'sender:mailing_detail' object.mailing.pk %}">
                 <img src="{% static 'img/close.png' %}">
             </a>
