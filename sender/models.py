@@ -28,7 +28,6 @@ class User(AbstractUser):
     email_verify = models.BooleanField(default=False)
     banned = models.CharField(choices=BANNED_STATUSES, default=BANNED_FALSE, max_length=30, verbose_name='Забанить пользователя?')
     comment = models.CharField(verbose_name='Комментарий пользователю', **NULLABLE, max_length=100)
-    register_at = models.DateTimeField(verbose_name='Дата регистрации', auto_now_add=True, **NULLABLE)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
@@ -87,7 +86,7 @@ class ConfigMailing(models.Model):
     monthdates = models.CharField(verbose_name='Дни месяца cron-формат', max_length=100, **NULLABLE)
     monthdates_text = models.CharField(verbose_name='Дни месяца с пробелами', max_length=100, **NULLABLE)
     from_email = models.EmailField(verbose_name='Email рассылки', unique=False, **NULLABLE)
-    password_user_from_email = models.CharField(max_length=300, verbose_name='Пароль от почты пользвоателя', **NULLABLE)
+    password_from_email = models.CharField(max_length=150, verbose_name='Пароль от почты рассылки', **NULLABLE)
     banned = models.CharField(choices=BANNED_STATUSES, default=BANNED_FALSE, max_length=30, verbose_name='Забанить пост?')
     create_at = models.DateTimeField(verbose_name='Дата создания', auto_now_add=True, **NULLABLE)
 
@@ -172,12 +171,44 @@ class Home(models.Model):
     home_annotation = models.CharField(max_length=150, verbose_name='Аннотация', help_text='До 150 символов')
     title = models.CharField(max_length=70, verbose_name='Метатэг Title', help_text='До 70 символов')
     description = tinymce_models.HTMLField(verbose_name='Содержание', **NULLABLE)
-    meta_description = models.CharField(verbose_name='Метатэг description', max_length=300, **NULLABLE, help_text='До 300 символов')
-    meta_keywords = models.CharField(max_length=150, verbose_name='Метатег Keywords', **NULLABLE, help_text='До 150 символов')
+    annotation_advantages = models.CharField(max_length=100, verbose_name='Заголовок перед блоком преимуществ',
+                                        **NULLABLE, help_text='До 100 символов')
+    annotation_posts = models.CharField(max_length=100, verbose_name='Заголовок перед блоком случайных постов',
+                                        **NULLABLE, help_text='До 100 символов')
+    picture = models.ImageField(verbose_name='Картинка в шапке', upload_to='home/', **NULLABLE,
+                                help_text='рекомендуемый размер - 2000*1000')
+    count_all_mailings = models.IntegerField(verbose_name='Всего рассылок',
+                                             help_text='Если поле пустое - берется автоматически из БД', **NULLABLE)
+    count_active_mailings = models.IntegerField(verbose_name='Активных рассылок',
+                                                help_text='Если поле пустое - берется автоматически из БД', **NULLABLE)
+    count_users = models.IntegerField(verbose_name='Количество пользователей',
+                                      help_text='Если поле пустое - берется автоматически из БД', **NULLABLE)
+    meta_description = models.CharField(verbose_name='Метатэг description', max_length=300, **NULLABLE,
+                                        help_text='До 300 символов')
+    meta_keywords = models.CharField(max_length=150, verbose_name='Метатег Keywords', **NULLABLE,
+                                     help_text='До 150 символов')
 
     class Meta():
         verbose_name = 'Главная страница'
         verbose_name_plural = 'Главная страница'
+
+
+class AdvantagesHome(models.Model):
+    STATUS_ACTIVE = 'опубликовано'
+    STATUS_INACTIVE = 'не опубликовано'
+    STATUSES = (
+        (STATUS_ACTIVE, 'ДА'),
+        (STATUS_INACTIVE, 'НЕТ')
+    )
+
+    title = models.CharField(max_length=50, verbose_name='Заголовок', help_text='До 50 символов')
+    description = models.CharField(max_length=200, verbose_name='Содержание', help_text='До 200 символов')
+    picture = models.ImageField(verbose_name='Картинка', upload_to='home/')
+    status = models.CharField(choices=STATUSES, default=STATUS_ACTIVE, max_length=20, verbose_name='Публиковать?')
+
+    class Meta():
+        verbose_name = 'Преимущество на главной'
+        verbose_name_plural = 'Преимущества на главной'
 
 
 class Blog(models.Model):
@@ -222,7 +253,6 @@ class Post(models.Model):
     )
 
 
-    user = models.ForeignKey(User, verbose_name='Автор (продавец)', on_delete=models.CASCADE, **NULLABLE)
     title = models.CharField(max_length=100, verbose_name='Заголовок', db_index=True, unique=True,  help_text='До 100 символов')
     slug = models.SlugField(max_length=100, verbose_name='URL',  db_index=True, unique=True, null=True)
     content = tinymce_models.HTMLField(verbose_name='Содержание', **NULLABLE)

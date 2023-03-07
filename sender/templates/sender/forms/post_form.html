@@ -3,7 +3,7 @@
 {% block content %}
 
 <head>
-  <title>{% if object.get_absolute_url %}Редактирование{% else %}Создание{% endif %}публикации</title>
+  <title>{% if object.slug %}Редактирование{% else %}Создание{% endif %} публикации</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 {{ form.media }}
 </head>
@@ -11,11 +11,12 @@
 <div class="container d-flex justify-content-center">
     <div class="card box-shadow border-dark mx-3 my-5 media-form text-center">
         <div class="card-header text-bg-warning py-1 text-center">
-        <h3>{% if object.get_absolute_url %}Редактирование{% else %}Создание{% endif %}публикации</h3>
+        <h3>{% if object.slug %}Редактирование{% else %}Создание{% endif %} публикации</h3>
         </div>
         <div class="card-body">
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
+                <div class="form-error text-danger">{{ form.title.errors }}</div>
                 {{ form.as_p }}
                 <div class="card-footer border-0 px-0 py-0 bg-transparent text-center">
                     <button class="btn btn-outline-primary w-50" type="submit">

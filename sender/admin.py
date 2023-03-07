@@ -1,5 +1,5 @@
 from django.contrib import admin
-from sender.models import User, Contacts, Blog, Home
+from sender.models import User, Contacts, Blog, Home, AdvantagesHome
 
 
 @admin.register(User)
@@ -35,6 +35,11 @@ class HomeAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+@admin.register(AdvantagesHome)
+class AdvantagesHomeAdmin(admin.ModelAdmin):
+    list_display = ('title', 'description')
 
 
 @admin.register(Blog)

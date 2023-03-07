@@ -1,0 +1,167 @@
+{% extends 'sender/base.html' %}
+
+{% block content %}
+    {% load static %}
+    {% load user_agents %}
+
+<head>
+    <title>{{ home.title }}</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="description" content="{{ home.meta_description }}">
+    <meta name="Keywords" content="{{ home.meta_keywords }}">
+</head>
+
+<div class="container px-0 py-0 mt-0 mb-5 text-center px-0 header-home">
+    <div class="card text-bg-dark border-0 d-flex justify-content-center card-header-home">
+        <div class="wrapper-header-home-pc exmpl-header-home">
+            <img  class="card-img bg-home-header" src="{{ home.picture.url }}">
+         </div>
+         <div class="card-img-overlay home-text-overlay">
+             <h1 class="card-title mt-5">{{ home.home_h1 }}</h1>
+             <p class="lead mt-3">{{ home.home_annotation }}</p>
+             {% if request|is_pc %}
+             <div class="row mt-4">
+                <div class="col-4">
+                    <input type="number" class="hide" value="{{ home.count_all_mailings }}" id="GetNum1">
+                    <h2 class="running_num" id="SetNum1"></h2>
+                    <strong>Всего рассылок</strong>
+                </div>
+                <div class="col-4">
+                    <input type="number" class="hide" value="{{ home.count_active_mailings }}" id="GetNum2">
+                    <h2 class="running_num" id="SetNum2"></h2>
+                    <strong>Из них активных</strong>
+                </div>
+                <div class="col-4">
+                    <input type="number" class="hide" value="{{ home.count_users }}" id="GetNum3">
+                    <h2 class="running_num" id="SetNum3"></h2>
+                    <strong>Пользователей</strong>
+                </div>
+            </div>
+             {% endif %}
+             <div class="row d-flex justify-content-center mt-4">
+                 <div class="col-lg-4 col-xl-3 col-md-5 col-sm-12 col-12">
+                    <button class="btn btn-block btn-warning" href="{% url 'sender:registration' %}">
+                        <strong>ЗАРЕГИСТРИРОВАТЬСЯ</strong>
+                    </button>
+                </div>
+             </div>
+         </div>
+    </div>
+</div>
+
+<div class="container d-flex justify-content-center mb-3">
+    <div class="row d-flex justify-content-center text-center">
+        <h2>{{ home.annotation_advantages }}</h2>
+    </div>
+</div>
+<div class="container d-flex justify-content-center mb-5 advantages-container">
+    <div class="row d-flex justify-content-center text-center">
+        {%  for advantage in advantage_list %}
+        <div class="col-lg-4 col-md-4 col-sm-12 col-12 advantage-card">
+            <div class="card text-center border-dark bg-warning mb-3">
+                <div class="card-header border-0 bg-transparent">
+                    <h5>{{ advantage.title }}</h5>
+                </div>
+                <div class="card-body">
+                    <p>{{ advantage.description }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="container d-flex justify-content-center mb-3 col-12">
+    <div class="row col-lg-8 col-xl-7 col-md-10 col-sm-12 col-12 bg-transparent text-center">
+        <h2>{{ home.annotation_posts }}</h2>
+    </div>
+</div>
+<div class="container d-flex justify-content-center mb-3">
+    <div class="row">
+        {% for post in post_list %}
+        <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="card text-bg-dark border-0 mb-3">
+                <div class="wrapper-post exmpl">
+                    <img  class="card-img bg-post-preview" src="{% if post.picture %}{{ post.picture.url }}
+                                                            {% else %}{% static "img/post-no-image.jpg" %}
+                                                            {% endif %}">
+                 </div>
+                 <a class="img-fluid" href="{% url 'sender:post_detail' post.slug %}">
+                     <div class="card-img-overlay post-white-link">
+                         <h5 class="card-title">{{ post.title }}</h5>
+                         <p>{{ post.create_at.date }}</p>
+                     </div>
+                 </a>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+</div>
+
+ <div class="container mb-5 d-flex justify-content-center mb-5">
+    <div class="col-lg-8 col-xl-7 col-md-12 col-sm-12 col-12">
+        {% if home.description %}
+            {% autoescape off %}{{ home.description }}{% endautoescape %}
+        {% endif %}
+    </div>
+ </div>
+
+<script>
+function runNum1() {
+    const elem1 = document.getElementById('SetNum1');
+    const num1 = Number(document.getElementById('GetNum1').value);
+    let time = 1000; //ms
+    let step = 1;
+    let n = 0;
+    let t = Math.round(time/(num1/step));
+    let interval = setInterval(() => {
+        n = n + step;
+        if (n === num1) {
+            clearInterval(interval);
+        }
+        elem1.innerHTML = n;
+        },
+        t);
+}
+runNum1();
+
+function runNum2() {
+    const elem2 = document.getElementById('SetNum2');
+    const num2 = Number(document.getElementById('GetNum2').value);
+    let time = 1000; //ms
+    let step = 1;
+    let n = 0;
+    let t = Math.round(time/(num2/step));
+    let interval = setInterval(() => {
+        n = n + step;
+        if (n === num2) {
+            clearInterval(interval);
+        }
+        elem2.innerHTML = n;
+        },
+        t);
+}
+runNum2();
+
+function runNum3() {
+    const elem3 = document.getElementById('SetNum3');
+    const num3 = Number(document.getElementById('GetNum3').value);
+    let time = 1000; //ms
+    let step = 1;
+    let n = 0;
+    let t = Math.round(time/(num3/step));
+    let interval = setInterval(() => {
+        n = n + step;
+        if (n === num3) {
+            clearInterval(interval);
+        }
+        elem3.innerHTML = n;
+        },
+        t);
+}
+runNum3();
+
+</script>
+
+{% endblock %}
+

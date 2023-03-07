@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django import forms
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from sender.forms_mixin import StyleFormMixin
-from sender.models import User, LetterMailing, Blog, ConfigMailing
+from sender.models import User, LetterMailing, Blog, ConfigMailing, Post
 from sender.utils import custom_send_mail
 
 
@@ -134,7 +134,7 @@ class CustomPasswordResetForm(StyleFormMixin, forms.Form):
             return email
 
 
-class UpdateBlogForm(StyleFormMixin, forms.ModelForm):
+class BlogForm(StyleFormMixin, forms.ModelForm):
 
     class Meta:
         model = Blog
@@ -183,3 +183,17 @@ class UserBannedForm(StyleFormMixin, forms.ModelForm):
 
 class UserCommentForm(StyleFormMixin, forms.Form):
     comment = forms.CharField(widget=forms.Textarea(attrs={'cols': 60, 'rows': 3}), required=False, label='Комментарий', max_length=100)
+
+
+class PostForm(StyleFormMixin, forms.ModelForm):
+
+    class Meta:
+        model = Post
+        exclude = ('slug', 'count_views', 'change_at')
+
+
+class CustomUserEditForm(StyleFormMixin, forms.ModelForm):
+
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name', 'country', 'phone',)

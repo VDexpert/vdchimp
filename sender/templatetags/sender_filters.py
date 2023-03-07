@@ -5,7 +5,7 @@ from django.utils.safestring import mark_safe
 from time import strftime
 import re
 
-from sender.models import ConfigMailing
+from sender.models import ConfigMailing, Home
 
 register = template.Library()
 
@@ -122,3 +122,6 @@ def datetostr(date):
 @register.filter
 def checkpermissions(user):
     return True if not user.has_perm('sender.view_and_ban_any_mailing') and not user.has_perm('sender.view_and_ban_any_user') and not user.has_perm('sender.content_management') else False
+
+def returnhomeobjectpk(some):
+    return Home.objects.all().first().pk

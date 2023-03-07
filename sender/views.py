@@ -1,4 +1,5 @@
 import os
+from random import randint
 from smtplib import SMTPException
 from django.core.mail import send_mail
 from django.utils import timezone
@@ -161,15 +162,14 @@ class LoginUser(LoginView):
     def get_success_url(self):
         user = self.request.user
 
-
         if user.has_perm('sender.view_and_ban_any_mailing'):
             return reverse_lazy('sender:moderating_mailings')
 
         if user.has_perm('sender.view_and_ban_any_user'):
             return reverse_lazy('sender:moderating_users')
 
-        if user.has_perm('sender.management_category'):
-            return reverse_lazy('sender:content_management_blog')
+        if user.has_perm('sender.content_management'):
+            return reverse_lazy('sender:content_management_posts')
 
         return reverse_lazy('sender:profile')
 
@@ -192,6 +192,23 @@ class ListAndCreateConfigMailing(CreateView):
     fields = ('title', 'hour', 'minute', 'periodicity', 'mail_dump')
     template_name = 'sender/mailing_list_user.html'
     success_url = reverse_lazy('sender:profile')
+
+    def get(self, request, *args, **kwargs):
+        user = self.request.user
+
+        if not user.is_authenticated:
+            return HttpResponseRedirect(reverse_lazy('sender:login'))
+
+        if user.has_perm('sender.view_and_ban_any_mailing'):
+            return super().get(request, *args, **kwargs)
+
+        if user.has_perm('sender.view_and_ban_any_user'):
+            return HttpResponseRedirect(reverse_lazy('sender:access_error'))
+
+        if user.has_perm('sender.content_management'):
+            return HttpResponseRedirect(reverse_lazy('sender:access_error'))
+
+        return super().get(request, *args, **kwargs)
 
     def form_valid(self, form):
         self.object = form.save()
@@ -227,6 +244,23 @@ class ConfigMailingCreateViewMobile(CreateView):
     fields = ('title', 'from_email', 'hour', 'minute', 'periodicity', 'mail_dump')
     success_url = reverse_lazy('sender:profile')
 
+    def get(self, request, *args, **kwargs):
+        user = self.request.user
+
+        if not user.is_authenticated:
+            return HttpResponseRedirect(reverse_lazy('sender:login'))
+
+        if user.has_perm('sender.view_and_ban_any_mailing'):
+            return super().get(request, *args, **kwargs)
+
+        if user.has_perm('sender.view_and_ban_any_user'):
+            return HttpResponseRedirect(reverse_lazy('sender:access_error'))
+
+        if user.has_perm('sender.content_management'):
+            return HttpResponseRedirect(reverse_lazy('sender:access_error'))
+
+        return super().get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update(include_static_context())
@@ -256,6 +290,16 @@ class ConfigMailingUpdateView(UpdateView):
     model = ConfigMailing
     fields = ('title', 'from_email', 'hour', 'minute', 'periodicity', 'mail_dump')
     template_name = 'sender/mailing_update.html'
+
+    def get(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            return HttpResponseRedirect(reverse_lazy('sender:login'))
+
+        if self.get_object().user != self.request.user:
+            return HttpResponseRedirect(reverse_lazy('sender:access_error'))
+
+        return super().get(request, *args, **kwargs)
+
 
     def form_valid(self, form):
         self.object = form.save()
@@ -295,10 +339,10 @@ class ConfigMailingModeratingListView(ListView):
         user = self.request.user
 
         if not user.is_authenticated:
-            redirect('sender:login')
+            return HttpResponseRedirect(reverse_lazy('sender:login'))
 
         if not user.has_perm('sender.view_and_ban_any_mailing'):
-            return redirect('sender:access_error')
+            return HttpResponseRedirect(reverse_lazy('sender:access_error'))
 
         return super().get(request, *args, **kwargs)
 
@@ -314,6 +358,17 @@ class ConfigMailingModeratingDetailView(DetailView):
     model = ConfigMailing
     template_name = 'sender/mailing_detail_moderating.html'
 
+    def get(self, request, *args, **kwargs):
+        user = self.request.user
+
+        if not user.is_authenticated:
+            return HttpResponseRedirect(reverse_lazy('sender:login'))
+
+        if not user.has_perm('sender.view_and_ban_any_mailing'):
+            return HttpResponseRedirect(reverse_lazy('sender:access_error'))
+
+        return super().get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['trials'] = TryMailing.objects.all().filter(mailing=self.get_object())
@@ -328,6 +383,15 @@ class WeekdayUpdateConfigMailingDetailView(DetailView):
     model = ConfigMailing
     template_name = 'sender/mailing_update_weekday.html'
     form = UpdateWeekdayForm()
+
+    def get(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            return HttpResponseRedirect(reverse_lazy('sender:login'))
+
+        if self.get_object().user != self.request.user:
+            return HttpResponseRedirect(reverse_lazy('sender:access_error'))
+
+        return super().get(request, *args, **kwargs)
 
     def post(self, form, pk):
         mailing = ConfigMailing.objects.all().get(id=pk)
@@ -351,12 +415,14 @@ class WeekdayUpdateConfigMailingDetailView(DetailView):
         path_project = '/'.join(os.path.abspath('manage.py').split('/')[3:-1])
         cmd = f'cd {path_project} && myvenv/bin/python3 manage.py send_by_cron -u {user.pk} -m {mailing.pk} >> log_cronjobs.txt'''
         os.system(f'''crontab -l | grep -v -F "{cmd}" | crontab -''')
-        start = 'crontab -l | { cat; echo '
-        time = f'''"{mailing.minute} {mailing.hour} * * {mailing.weekdays} '''
-        cmd = f'{cmd}"; '
-        end = '} | crontab -'
-        os_cmd = start + time + cmd + end
-        os.system(os_cmd)
+
+        if mailing.weekdays:
+            start = 'crontab -l | { cat; echo '
+            time = f'''"{mailing.minute} {mailing.hour} * * {mailing.weekdays} '''
+            cmd = f'{cmd}"; '
+            end = '} | crontab -'
+            os_cmd = start + time + cmd + end
+            os.system(os_cmd)
 
         return self.get_success_url()
 
@@ -375,6 +441,15 @@ class MonthdateUpdateConfigMailingDetailView(DetailView):
     model = ConfigMailing
     template_name = 'sender/mailing_update_monthdate.html'
     form = UpdateMonthdateForm()
+
+    def get(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            return HttpResponseRedirect(reverse_lazy('sender:login'))
+
+        if self.get_object().user != self.request.user:
+            return HttpResponseRedirect(reverse_lazy('sender:access_error'))
+
+        return super().get(request, *args, **kwargs)
 
     def post(self, form, pk):
         mailing = ConfigMailing.objects.all().get(id=pk)
@@ -396,12 +471,14 @@ class MonthdateUpdateConfigMailingDetailView(DetailView):
         path_project = '/'.join(os.path.abspath('manage.py').split('/')[3:-1])
         cmd = f'cd {path_project} && myvenv/bin/python3 manage.py send_by_cron -u {user.pk} -m {mailing.pk} >> log_cronjobs.txt'''
         os.system(f'''crontab -l | grep -v -F "{cmd}" | crontab -''')
-        start = 'crontab -l | { cat; echo '
-        time = f'''"{mailing.minute} {mailing.hour} {mailing.monthdates} * * '''
-        cmd = f'{cmd}"; '
-        end = '} | crontab -'
-        os_cmd = start + time + cmd + end
-        os.system(os_cmd)
+
+        if mailing.monthdates:
+            start = 'crontab -l | { cat; echo '
+            time = f'''"{mailing.minute} {mailing.hour} {mailing.monthdates} * * '''
+            cmd = f'{cmd}"; '
+            end = '} | crontab -'
+            os_cmd = start + time + cmd + end
+            os.system(os_cmd)
 
         return self.get_success_url()
 
@@ -420,6 +497,15 @@ class ConfigMailingDeleteView(DeleteView):
     model = ConfigMailing
     template_name = 'sender/forms/delete_mailing.html'
     success_url = reverse_lazy('sender:profile')
+
+    def get(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            return HttpResponseRedirect(reverse_lazy('sender:login'))
+
+        if self.get_object().user != self.request.user:
+            return HttpResponseRedirect(reverse_lazy('sender:access_error'))
+
+        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -441,6 +527,12 @@ class RestartConfigMailingDetailView(DetailView):
     template_name = 'sender/restart_mailing.html'
 
     def get(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            return HttpResponseRedirect(reverse_lazy('sender:login'))
+
+        if self.get_object().user != self.request.user:
+            return HttpResponseRedirect(reverse_lazy('sender:access_error'))
+
         obj = super().get_object()
         obj.status = ConfigMailing.STATUS_CREATED
         obj.save()
@@ -459,6 +551,23 @@ class LetterMailingCreateView(DetailView):
     model = ConfigMailing
     form = LetterCreateForm()
     template_name = 'sender/forms/letter_form.html'
+
+    def get(self, request, *args, **kwargs):
+        user = self.request.user
+
+        if not user.is_authenticated:
+            return HttpResponseRedirect(reverse_lazy('sender:login'))
+
+        if user.has_perm('sender.view_and_ban_any_mailing'):
+            return super().get(request, *args, **kwargs)
+
+        if user.has_perm('sender.view_and_ban_any_user'):
+            return HttpResponseRedirect(reverse_lazy('sender:access_error'))
+
+        if user.has_perm('sender.content_management'):
+            return HttpResponseRedirect(reverse_lazy('sender:access_error'))
+
+        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -484,6 +593,15 @@ class LetterMailingUpdateView(UpdateView):
     template_name = 'sender/forms/letter_form.html'
     pk_url_kwarg = 'letter_pk'
 
+    def get(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            return HttpResponseRedirect(reverse_lazy('sender:login'))
+
+        if self.get_object().mailing.user != self.request.user:
+            return HttpResponseRedirect(reverse_lazy('sender:access_error'))
+
+        return super().get(request, *args, **kwargs)
+
     def get_success_url(self):
         return reverse_lazy('sender:mailing_detail', kwargs={'pk': self.get_object().mailing.pk})
 
@@ -500,6 +618,15 @@ class LetterMailingDeleteView(DeleteView):
     template_name = 'sender/forms/delete_letter.html'
     pk_url_kwarg = 'letter_pk'
 
+    def get(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            return HttpResponseRedirect(reverse_lazy('sender:login'))
+
+        if self.get_object().mailing.user != self.request.user:
+            return HttpResponseRedirect(reverse_lazy('sender:access_error'))
+
+        return super().get(request, *args, **kwargs)
+
     def get_success_url(self):
         return reverse_lazy('sender:mailing_detail', kwargs={'pk': self.get_object().mailing.pk})
 
@@ -515,6 +642,12 @@ class TryMailingListView(ListView):
     template_name = 'sender/try_list.html'
     success_url = reverse_lazy('sender:trials')
 
+    def get(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            return HttpResponseRedirect(reverse_lazy('sender:login'))
+
+        return super().get(request, *args, **kwargs)
+
     def get_queryset(self):
         user = self.request.user
 
@@ -522,24 +655,6 @@ class TryMailingListView(ListView):
             return super().get_queryset().order_by('-date_time_try')
 
         return super().get_queryset().filter(user=self.request.user).order_by('-date_time_try')
-
-
-class ContactsFormView(FormView):
-    template_name = 'sender/contacts.html'
-    form_class = FeedbackForm
-    success_url = reverse_lazy('catalog:after_feedback')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['contacts'] = Contacts.objects.all().get(id=1)
-
-        return context
-
-    def form_valid(self, form):
-        recipients = [x.email for x in User.objects.all().filter(groups__name='Менеджеры')]
-        custom_send_mail.feedback(form.data['name'], form.data['email'], form.data['message'], recipients)
-
-        return super().form_valid(form)
 
 
 class InvalidVerifyTemplateView(TemplateView):
@@ -557,7 +672,17 @@ class InvalidVerifyTemplateView(TemplateView):
 class UserListModeratingListView(ListView):
     model = User
     template_name = 'sender/user_list_moderating.html'
-    ordering = '-register_at'
+
+    def get(self, request, *args, **kwargs):
+        user = self.request.user
+
+        if not user.is_authenticated:
+            return HttpResponseRedirect(reverse_lazy('sender:login'))
+
+        if not user.has_perm('sender.view_and_ban_any_user'):
+            return HttpResponseRedirect(reverse_lazy('sender:access_error'))
+
+        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -570,6 +695,17 @@ class UserCommentModeratingUpdateView(DetailView):
     model = User
     template_name = 'sender/forms/user_comment_form.html'
     form = UserCommentForm()
+
+    def get(self, request, *args, **kwargs):
+        user = self.request.user
+
+        if not user.is_authenticated:
+            return HttpResponseRedirect(reverse_lazy('sender:login'))
+
+        if not user.has_perm('sender.view_and_ban_any_user'):
+            return HttpResponseRedirect(reverse_lazy('sender:access_error'))
+
+        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -594,10 +730,10 @@ class MailingBannedUpdateView(UpdateView):
         user = self.request.user
 
         if not user.is_authenticated:
-            return redirect('sender:login')
+            return HttpResponseRedirect(reverse_lazy('sender:login'))
 
         if not user.has_perm('sender.view_and_ban_any_mailing'):
-            return redirect('sender:access_error')
+            return HttpResponseRedirect(reverse_lazy('sender:access_error'))
 
         return super().get(request, *args, **kwargs)
 
@@ -671,10 +807,10 @@ class UserBannedUpdateView(UpdateView):
         user = self.request.user
 
         if not user.is_authenticated:
-            return redirect('sender:login')
+            return HttpResponseRedirect(reverse_lazy('sender:login'))
 
         if not user.has_perm('sender.view_and_ban_any_user'):
-            return redirect('sender:access_error')
+            return HttpResponseRedirect(reverse_lazy('sender:access_error'))
 
         return super().get(request, *args, **kwargs)
 
@@ -745,6 +881,17 @@ class PostListContentManagementListView(ListView):
     paginate_by = 12
     ordering = ['-create_at']
 
+    def get(self, request, *args, **kwargs):
+        user = self.request.user
+
+        if not user.is_authenticated:
+            return HttpResponseRedirect(reverse_lazy('sender:login'))
+
+        if not user.has_perm('sender.content_management'):
+            return HttpResponseRedirect(reverse_lazy('sender:access_error'))
+
+        return super().get(request, *args, **kwargs)
+
 
 class PostListView(ListView):
     model = Post
@@ -756,6 +903,7 @@ class PostListView(ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context['count_posts'] = self.get_queryset().count()
+        context['blog'] = Blog.objects.all().first()
 
         return context
 
@@ -781,15 +929,16 @@ class PostDetailView(DetailView):
 class PostCreateView(CreateView):
     model = Post
     template_name = 'sender/forms/post_form.html'
+    form_class = PostForm
 
     def get(self, request, *args, **kwargs):
         user = self.request.user
 
         if not user.is_authenticated:
-            return redirect('sender:login')
+            return HttpResponseRedirect(reverse_lazy('sender:login'))
 
         if not user.has_perm('sender.content_management'):
-            return redirect('sender:access_error')
+            return HttpResponseRedirect(reverse_lazy('sender:access_error'))
 
         return super().get(request, *args, **kwargs)
 
@@ -806,15 +955,16 @@ class PostCreateView(CreateView):
 class PostUpdateView(UpdateView):
     model = Post
     template_name = 'sender/forms/post_form.html'
+    form_class = PostForm
 
     def get(self, request, *args, **kwargs):
         user = self.request.user
 
         if not user.is_authenticated:
-            return redirect('sender:login')
+            return HttpResponseRedirect(reverse_lazy('sender:login'))
 
         if not user.has_perm('sender.content_management'):
-            return redirect('sender:access_error')
+            return HttpResponseRedirect(reverse_lazy('sender:access_error'))
 
         return super().get(request, *args, **kwargs)
 
@@ -833,36 +983,35 @@ class PostUpdateView(UpdateView):
 class PostDeleteView(DeleteView):
     model = Post
     template_name = 'sender/forms/delete_post.html'
-    success_url = reverse_lazy('users:user_posts')
 
     def get(self, request, *args, **kwargs):
         user = self.request.user
 
         if not user.is_authenticated:
-            return redirect('sender:login')
+            return HttpResponseRedirect(reverse_lazy('sender:login'))
 
         if not user.has_perm('sender.content_management'):
-            return redirect('sender:access_error')
+            return HttpResponseRedirect(reverse_lazy('sender:access_error'))
 
         return super().get(request, *args, **kwargs)
 
     def get_success_url(self):
-        return reverse_lazy('sender:content_management_posts')
+        return HttpResponseRedirect(reverse_lazy('sender:content_management_posts'))
 
 
 class BlogUpdateView(UpdateView):
     model = Blog
     template_name = 'sender/blog_form.html'
-    form_class = UpdateBlogForm
+    form_class = BlogForm
 
     def get(self, request, *args, **kwargs):
         user = self.request.user
 
         if not user.is_authenticated:
-            return redirect('sender:login')
+            return HttpResponseRedirect(reverse_lazy('sender:login'))
 
         if not user.has_perm('sender.content_management'):
-            return redirect('sender:access_error')
+            return HttpResponseRedirect(reverse_lazy('sender:access_error'))
 
         return super().get(request, *args, **kwargs)
 
@@ -876,7 +1025,20 @@ class BlogUpdateView(UpdateView):
 class CustomPasswordChangeView(PasswordChangeView):
     template_name = 'sender/forms/change_password.html'
     model = User
-    success_url = reverse_lazy('sender:profile')
+
+    def get_success_url(self):
+        user = self.request.user
+
+        if user.has_perm('sender.view_and_ban_any_mailing'):
+            return HttpResponseRedirect(reverse_lazy('sender:moderating_mailings'))
+
+        if user.has_perm('sender.view_and_ban_any_user'):
+            return HttpResponseRedirect(reverse_lazy('sender:moderating_users'))
+
+        if user.has_perm('sender.content_management'):
+            return HttpResponseRedirect(reverse_lazy('sender:content_management_posts'))
+
+        return HttpResponseRedirect(reverse_lazy('sender:profile'))
 
 
 class CustomPasswordResetFormView(FormView):
@@ -884,14 +1046,24 @@ class CustomPasswordResetFormView(FormView):
     form_class = CustomPasswordResetForm
 
     def get(self, request, *args, **kwargs):
+        user = self.request.user
 
-        if self.request.user.is_authenticated:
-            return redirect('sender:profile')
+        if user.is_authenticated and user.has_perm('sender.view_and_ban_any_mailing'):
+            return HttpResponseRedirect(reverse_lazy('sender:moderating_mailings'))
+
+        if user.is_authenticated and user.has_perm('sender.view_and_ban_any_user'):
+            return HttpResponseRedirect(reverse_lazy('sender:moderating_users'))
+
+        if user.is_authenticated and user.has_perm('sender.content_management'):
+            return HttpResponseRedirect(reverse_lazy('sender:content_management_posts'))
+
+        if user.is_authenticated:
+            return HttpResponseRedirect(reverse_lazy('sender:profile'))
 
         return super().get(request, *args, **kwargs)
 
     def get_success_url(self):
-        return reverse_lazy('sender:confirm_reset')
+        return HttpResponseRedirect(reverse_lazy('sender:confirm_reset'))
 
     def post(self, request, *args, **kwargs):
         form = self.get_form()
@@ -902,6 +1074,7 @@ class CustomPasswordResetFormView(FormView):
             new_password = User.objects.make_random_password(length=20)
             user.set_password(new_password)
             user.save()
+
             try:
                 custom_send_mail.reset_password(request, email, new_password)
 
@@ -922,15 +1095,117 @@ class ConfirmResetPasswordTemplateView(TemplateView):
     template_name = 'sender/service/after_reset_password.html'
 
     def get(self, request, *args, **kwargs):
+        user = self.request.user
+
+        if user.is_authenticated and user.has_perm('sender.view_and_ban_any_mailing'):
+            return HttpResponseRedirect(reverse_lazy('sender:moderating_mailings'))
+
+        if user.is_authenticated and user.has_perm('sender.view_and_ban_any_user'):
+            return HttpResponseRedirect(reverse_lazy('sender:moderating_users'))
+
+        if user.is_authenticated and user.has_perm('sender.content_management'):
+            return HttpResponseRedirect(reverse_lazy('sender:content_management_posts'))
+
+        if user.is_authenticated:
+            return HttpResponseRedirect(reverse_lazy('sender:profile'))
+
+        return super().get(request, *args, **kwargs)
+
+
+class UserProfileUpdateView(UpdateView):
+    model = User
+    form_class = CustomUserEditForm
+    template_name = 'sender/forms/edit_profile.html'
+
+    def get(self, request, *args, **kwargs):
+        super().get(request, *args, **kwargs)
+
+        if not self.request.user.is_authenticated:
+            return HttpResponseRedirect(reverse_lazy('sender:login'))
+
+        return self.render_to_response(self.get_context_data())
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    def get_success_url(self):
+        user = self.request.user
+
+        if user.has_perm('sender.view_and_ban_any_mailing'):
+            return HttpResponseRedirect(reverse_lazy('sender:moderating_mailings'))
+
+        if user.has_perm('sender.view_and_ban_any_user'):
+            return HttpResponseRedirect(reverse_lazy('sender:moderating_users'))
+
+        if user.has_perm('sender.content_management'):
+            return HttpResponseRedirect(reverse_lazy('sender:content_management_posts'))
+
+        return HttpResponseRedirect(reverse_lazy('sender:profile'))
+
+    def form_valid(self, form):
+        self.object = form.save()
+        self.object.phone = str(self.object.phone).replace('+', '').replace('(', '').replace(')', '').replace('-', '').replace(' ', '')
+        self.object.save()
+
+        return HttpResponseRedirect(self.get_success_url())
+
+
+class HomeDetailView(DetailView):
+    model = Home
+    template_name = 'sender/home.html'
+
+    def get_object(self, queryset=None):
+        return Home.objects.all().first()
+
+    def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['home'] = Home.objects.all().first()
+        context['advantage_list'] = AdvantagesHome.objects.all().filter(status=AdvantagesHome.STATUS_ACTIVE)
+        context['db_count_users'] = User.objects.all().count()
+        context['db_count_all_mailings'] = ConfigMailing.objects.all().count()
+        context['db_count_active_mailings'] = ConfigMailing.objects.all().filter(status=ConfigMailing.STATUS_CREATED)
 
-        if self.request.user.is_authenticated:
-            return redirect('sender:profile')
+        count_post = Post.objects.all().filter(status=Post.STATUS_ACTIVE).count()
+        rand_post_id = []
+        while len(rand_post_id) < 6:
+            x = randint(1, count_post)
+            if x in rand_post_id:
+                continue
+            rand_post_id.append(x)
 
-        return self.render_to_response(context)
+        post_list = []
+        for num in rand_post_id:
+            post_list.append(Post.objects.all().get(id=num))
+
+        context['post_list'] = post_list
+
+        return context
 
 
+class ContactsFormView(FormView):
+    template_name = 'sender/contacts.html'
+    form_class = FeedbackForm
+    success_url = reverse_lazy('catalog:after_feedback')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['contacts'] = Contacts.objects.all().get(id=1)
+
+        return context
+
+    def form_valid(self, form):
+        recipients = [x.email for x in User.objects.all().filter(groups__name='Менеджеры')]
+        custom_send_mail.feedback(form.data['name'], form.data['email'], form.data['message'], recipients)
+
+        return super().form_valid(form)
 
 
+def error_404(request, exception):
+    context = {}
+    context['page_title'] = '404'
+    response = render(request, 'sender/service/page_404.html', context=context)
+    response.status_code = 404
+
+    return response
 
 

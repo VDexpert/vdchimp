@@ -1,12 +1,9 @@
-
-    {% load static %}
+ {% load static %}
     {% load sender_tags %}
     {% load sender_filters %}
     {% load user_agents %}
 
-<div class="container my-5 container-mailings
-{% if request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %} mx-0
-{% else %} mx-5{% endif %}">
+<div class="container my-5 container-mailings">
     <div class="row d-flex justify-content-center">
         {% if not object_list %}
         <div class="col-lg-8 col-xl-9 col-md-12 col-sm-12 col-12 mb-3 text-center">

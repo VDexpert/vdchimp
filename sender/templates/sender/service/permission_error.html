@@ -10,11 +10,6 @@
             </div>
             <div class="col-lg-6 col-md-12 col-sm-12">
                 <p class="lead">У Вас недостаточно прав для просмотра запрошенной страницы</p>
-                {% if not perms.sender.view_and_block_any_user %}
-                    <a class="p-2 btn btn-outline-success w-75" href="{% url 'sender:profile' %}"><strong>В личный кабинет</strong></a>
-                {% else %}
-                    <a class="p-2 btn btn-outline-success w-75" href="{% url 'sender:users' %}"><strong>В личный кабинет</strong></a>
-                {% endif %}
             </div>
         </div>
     </div>

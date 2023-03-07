@@ -5,12 +5,14 @@ from sender.apps import SenderConfig
 app_name = SenderConfig.name
 
 urlpatterns = [
+    path('', HomeDetailView.as_view(), name='home'),
     path('blog', PostListView.as_view(), name='post_list'),
     path('blog/<str:slug>', PostDetailView.as_view(), name='post_detail'),
     path('update-blog', BlogUpdateView.as_view(), name='update_blog'),
     path('content-management-posts', PostListContentManagementListView.as_view(), name='content_management_posts'),
     path('create-post', PostCreateView.as_view(), name='create_post'),
-    path('update-post', PostUpdateView.as_view(), name='update_post'),
+    path('update-post/<int:pk>/', PostUpdateView.as_view(), name='update_post'),
+    path('delete-post/<int:pk>/', PostDeleteView.as_view(), name='delete_post'),
     path('contacts', ContactsFormView.as_view(), name='contacts'),
     path('login', LoginUser.as_view(), name='login'),
     path('logout', logout_user, name='logout'),
@@ -19,6 +21,7 @@ urlpatterns = [
     path('verify-email/<uidb64>/<token>/', EmailVerifyView.as_view(), name='verify_email'),
     path('invalid-verify', InvalidVerifyTemplateView.as_view(), name='invalid_verify'),
     path('confirm-email', ConfirmEmailTemplateView.as_view(), name='confirm_email'),
+    path('edit-profile', UserProfileUpdateView.as_view(), name='edit_profile'),
     path('change-password/', CustomPasswordChangeView.as_view(), name='change_password'),
     path('reset-password/', CustomPasswordResetFormView.as_view(), name='reset_password'),
     path('success-reset-password/', ConfirmResetPasswordTemplateView.as_view(), name='confirm_reset'),

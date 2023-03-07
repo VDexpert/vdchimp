@@ -1,4 +1,4 @@
-{% extends 'catalog/base.html' %}
+{% extends 'sender/base.html' %}
 
 {% block content %}
 
@@ -15,7 +15,7 @@
         <div class="card-body">
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
-                <p>Вы действительно хотите удалить публикацию '{{ object.title }}'? Отменить удаление будет невозможно!</p>
+                <p>Вы действительно хотите удалить публикацию <strong>'{{ object.title }}'</strong>? Отменить удаление будет невозможно!</p>
                <div class="card-footer border-0 px-0 py-0 bg-transparent">
                    <div class="row">
                     <div class="col-6">

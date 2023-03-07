@@ -1,0 +1,44 @@
+{% extends 'catalog/base.html' %}
+
+{% load user_agents %}
+
+{% block content %}
+
+<head>
+  <title>Страница не найдена</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+
+<div style="min-height:50vh" class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h3 class="display-4">Страница не найдена</h3>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 col-md-12 col-sm-12">
+            </div>
+            <div class="col-lg-6 col-md-12 col-sm-12">
+                <p class="lead">Запрошенная Вами страница не существует или информация на ней была удалена.</p>
+                <div class="row">
+                    {% if request.META.HTTP_REFERER %}
+                        <div class="col-12">
+                            <a class="p-2 btn btn-outline-primary {% if not request|is_mobile %}w-50
+                                                                    {% else %}w-75
+                                                                    {% endif %}" href="{{ request.META.HTTP_REFERER }}">
+                                <strong>Вернуться назад</strong>
+                            </a><br>
+                        </div>
+                    {% else %}
+                        <div class="col-12">
+                            <a class="p-2 btn btn-outline-primary {% if not request|is_mobile %}w-50
+                                                                    {% else %}w-75
+                                                                    {% endif %}" href="{% url 'sender:home' %}">
+                                <strong>Перейти на главную</strong>
+                            </a><br>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

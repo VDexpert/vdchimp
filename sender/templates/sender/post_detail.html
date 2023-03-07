@@ -2,6 +2,7 @@
 
     {% load static %}
     {% load user_agents %}
+    {% load sender_filters %}
 
 {% block content %}
 
@@ -33,6 +34,24 @@
                     <p class="card-text">{% autoescape off %}{{ object.content|linebreaks }}{% endautoescape %}
                     </p>
                 </div>
+                {% if perms.sender.content_management %}
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col-6 text-center">
+                            <a class="p-1 btn btn-outline-primary {% if request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}w-100
+                                                                    {% else %}w-75{% endif %}" href="{% url 'sender:update_post' object.pk %}">
+                                <strong>Изменить</strong>
+                            </a>
+                        </div>
+                        <div class="col-6 text-center">
+                            <a class="p-1 btn btn-outline-danger {% if request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}w-100
+                                                                    {% else %}w-75{% endif %}" href="{% url 'sender:delete_post' object.pk %}">
+                                <strong>Удалить</strong>
+                            </a>
+                        </div>
+                     </div>
+                </div>
+                {% endif %}
             </div>
         </div>
 {#        <div class="col-lg-4 col-md-12 col-sm-12">#}

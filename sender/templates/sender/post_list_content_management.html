@@ -3,28 +3,31 @@
 {% block content %}
     {% load static %}
     {% load user_agents %}
+    {% load sender_filters %}
 
-    <head>
-      <title>Публикации</title>
-      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    </head>
-
-{% if request|is_pc %}
+<head>
+  <title>Публикации</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
 
 <div class="container d-flex justify-content-center">
-    <div class="row">
+    <div class="row d-flex justify-content-center">
         <div class="col-lg-9 col-md-12 col-12">
-            <div class="card border-0 mb-5 mt-5">
-                <div class="card-header td-table-info text-center px-0 py-0">
-                    <div class="col-lg-6 col-md-6 col-sm-12">
-                        <a class="p-1 btn btn-outline-dark w-75 my-2" href="{% url 'sender:create_post' %}">
-                            <strong>Добавить публикацию</strong>
-                        </a>
-                    </div>
-                     <div class="col-lg-6 col-md-6 col-sm-12">
-                        <a class="p-1 btn btn-outline-dark w-75 my-2" href="{% url 'sender:update_blog' %}">
-                            <strong>Редактировать 'Блог'</strong>
-                        </a>
+            <div class="card border-0 mt-5">
+                <div class="card-header bg-transparent text-center px-0 py-0">
+                    <div class="row">
+                        <div class="col-6 px-3">
+                            <a class="p-1 btn btn-primary float-end my-2 px-2 {% if request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}w-100
+                                                                {% else %}w-50{% endif %}" href="{% url 'sender:create_post' %}">
+                                <img src="{% static 'img/pluswhite.png' %}">&nbsp;&nbsp;<strong>Статья</strong>
+                            </a>
+                        </div>
+                         <div class="col-6 px-3">
+                            <a class="p-1 btn btn-primary float-start my-2 px-2 {% if request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}w-100
+                                                                {% else %}w-50{% endif %}" href="{% url 'sender:update_blog' %}">
+                                <img src="{% static 'img/updatewhite.png' %}">&nbsp;&nbsp;<strong>Блог</strong>
+                            </a>
+                         </div>
                     </div>
                 </div>
             {% if object_list %}
@@ -32,8 +35,14 @@
                 <table class="table table-striped table-info mb-0">
                         <thead>
                             <tr class="text-center">
-                                <th class="col-4" scope="col">Заголовок</th>
+                                {% if request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}
+                                <th class="col-11" scope="col">Заголовок</th>
+                                {% else %}
+                                 <th class="col-4" scope="col">Заголовок</th>
+                                {% endif %}
+                                {% if request|is_pc or request|is_tablet or request.META.HTTP_USER_AGENT|checkuseragenttablet %}
                                 <th class="col-8" scope="col">Содержание</th>
+                                {% endif %}
                                 <th class="col-1" scope="col"></th>
                             </tr>
                         </thead>
@@ -43,16 +52,17 @@
                                        {% else %}table-info
                                        {% endif %}">
                                 <td>
-                                    <a href="{% url 'sender:post_detail' object.pk %}">
+                                    <a href="{% url 'sender:post_detail' object.slug %}">
                                         <p>{{ object.title }}</p>
                                     </a>
                                     {% if object.status == inactive %}
                                         <p class="text-danger"><strong>{{ object.status }}</strong></p>
                                     {% endif %}
                                 </td>
-
+                                {% if request|is_pc or request|is_tablet or request.META.HTTP_USER_AGENT|checkuseragenttablet %}
                                 <td>{% autoescape off %}{{ object.content|truncatechars_html:200 }}{% endautoescape %}
                                 </td>
+                                {% endif %}
 
                                 <td>
                                     <a class="img-fluid" href="{% url 'sender:update_post' object.pk %}">
@@ -72,16 +82,8 @@
         </div>
     </div>
 </div>
-
-
-{% elif request|is_tablet or request.META.HTTP_USER_AGENT|checkuseragenttablet %}
-
-
-
-{% elif request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}
-
-
-
-{% endif %}
+<div class="container d-flex justify-content-center mt-3 mb-5">
+{% include 'sender/includes/pagination.html' %}
+</div>
 
 {% endblock %}

@@ -275,6 +275,47 @@ img.info-register {
   max-width: 300px;
 }
 
-.bg-post-preview {
+.bg-home-header {
   filter: brightness(50%);
+}
+
+.home-text-overlay {
+  color: white;
+}
+
+.advantage-card {
+  max-width: 300px;
+}
+
+.advantages-container {
+  min-width: 100%;
+}
+
+.wrapper-header-home-pc {
+  min-width: 100%;
+  max-height: 350px;
+  align-items: center;
+}
+
+.exmpl-header-home {
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card-header-home {
+  border-radius: 0;
+}
+
+.header-home {
+  min-width: 100%;
+}
+
+.mailing-list {
+  min-width: 100%;
+}
+
+.user-list {
+  min-width: 100%;
 }
