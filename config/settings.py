@@ -119,12 +119,10 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'ru'
 
-TIME_ZONE = 'UTC'
-
 USE_I18N = True
 
 USE_TZ = True
-TIME_ZONE = 'Asia/Yekaterinburg'
+TIME_ZONE = "Europe/Moscow"
 
 
 # Static files (CSS, JavaScript, Images)
@@ -200,7 +198,7 @@ if CACHE_ENABLED:
         'default': {
             'BACKEND': 'django.core.cache.backends.redis.RedisCache',
             'LOCATION': 'redis://127.0.0.1:6379',
-            'TIMEOUT': None
+            'TIMEOUT': 300,
         }
     }
 

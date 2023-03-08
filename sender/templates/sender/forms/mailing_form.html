@@ -2,49 +2,50 @@
 {% load sender_tags %}
 {% load sender_filters %}
 
-<div class="card border-dark text-center mx-3">
-    <div class="card-header bg-warning px-0" style="display: flex;">
-        <h4 style="flex-grow: 1" class="text-dark my-0 font-weight-normal">
+<div class="card border-dark text-center mx-3 mailing-form">
+    <div class="card-header bg-warning px-0 d-flex">
+        <h4 class="header-text-form-popup text-dark my-0 font-weight-normal">
             {% if object.get_absolute_url %}Редактирование {% else %}Создание {% endif %}рассылки</h4>
-        <a style="margin-left: auto;" href="{% if object.get_absolute_url %}{% url 'sender:mailing_detail' object.pk %}
+        <a class="close-header-form-popup" href="{% if object.get_absolute_url %}{% url 'sender:mailing_detail' object.pk %}
                                             {% else %}{% url 'sender:profile' %}{% endif %}">
-            <img src="{% static 'img/close.png' %}">
+            <img class="icon-close-header-form-popup" src="{% static 'img/close.png' %}">
         </a>
     </div>
  <form class="form-container" method="post" enctype="multipart/form-data">
         <div class="card-body">
             {% csrf_token %}
-            <div class="col-12 mb-3">
+            <div class="col-12 mb-2">
                 <label for="id_title">{{ form.title.label }}</label>
                 <input type="text" value="{{ object.title }}" class="form-control form-control-sm" maxlength="100" name="title" required="" id="title">
-                <div class="form-error text-danger">{{  form.from_email.errors|format_err }}</div>
                 <span class="help-text">максимум - 100 символов</span>
             </div>
-            <div class="col-12 mb-3">
+            <div class="col-12 mb-2">
                 <label for="id_title">{{ form.from_email.label }}</label>
-                <input type="text" value="{{ object.from_email }}" class="form-control form-control-sm" name="from_email" maxlength="100" id="id_from_email">
+                <input type="text" {% if object.from_email %}value="{{ object.from_email }}"{% endif %} class="form-control form-control-sm" name="from_email" maxlength="100" id="id_from_email">
                 <div class="form-error text-danger">{{  form.from_email.errors|format_err }}</div>
-                <span class="help-text">почта для рассылки должна быть почтой для домена вашего сайта</span>
+                <span class="help-text">должна быть почтой для домена вашего сайта</span>
             </div>
-            <div class="col-12 mb-3">
+            <div class="col-12 mb-2">
                 <div class="row">
+                    <div class="col-12">
+                        <label>Время <strong>(UTC+2)</strong></label>
+                    </div>
                     <div class="col-6">
-                        <label for="id_hour">Час</label>
                         <select name="hour" class="form-control form-control-sm" id="id_hour">
-                        <option value="{{ object.hour }}" selected="">{{ object.hour }}</option>
+                            <option value="12" selected="">12</option>
                         {% for hour in hours %}
-                        <option value="{{ hour }}">{{ hour }}</option>
+                            <option value="{{ hour }}">{{ hour }}</option>
                         {% endfor %}
                         </select>
                     </div>
                     <div class="col-6">
-                        <label for="id_minute">Минуты</label>
                         <select name="minute" class="form-control form-control-sm" id="id_minute">
-                            <option value="{{ object.minute }}">{% if object.minute < 10 %}0{{ object.minute }}
-                                                                {% else %}{{ object.minute }}{% endif %}</option>
                             {% for minute in minutes %}
-                            <option value="{{ minute }}">{% if minute < 10 %}0{{ minute }}
-                                                            {% else %}{{ minute }}{% endif %}</option>
+                                {% if minute < 10 %}
+                                <option value="{{ minute }}">0{{ minute }}</option>
+                                {% else %}
+                                <option value="{{ minute }}">{{ minute }}</option>
+                                {% endif %}
                             {% endfor %}
                         </select>
                     </div>

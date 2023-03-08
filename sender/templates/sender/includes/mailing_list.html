@@ -3,7 +3,7 @@
     {% load sender_filters %}
     {% load user_agents %}
 
-<div class="container my-5 container-mailings">
+<div class="container my-5">
     <div class="row d-flex justify-content-center">
         {% if not object_list %}
         <div class="col-lg-8 col-xl-9 col-md-12 col-sm-12 col-12 mb-3 text-center">
@@ -43,7 +43,7 @@
                      </div>
                 </div>
                 {% endif %}
-              <div class="card-header px-0 td-table-info">
+              <div class="card-header px-0 py-0 td-table-info">
                    <div class="row td-table-info mb-0 mx-0 py-2">
                    {% if request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}
                         <div class="col-6">
@@ -74,7 +74,7 @@
                 </div>
                 <div class="card-body px-0 py-0">
                 {% for object in object_list %}
-                    <div class="username-card card" title="{{ object.user.email|cutemail }}">
+                    <div class="username-card card" title="{{ object.user.email|cutemail }}" style="border-radius: 0">
                         <div class="card-body py-0 px-0">
                             <div class="row my-0 mx-0 py-2{% if object.status == status_mailing_done %} bg-light
                                                             {% elif object.banned == ban_mailing_true %} td-table-danger
@@ -201,7 +201,7 @@
         <div class="col-lg-4 col-xl-3">
             <div class="card mb-5 box-shadow border-dark text-center">
                 <div class="card-header bg-warning">
-                    <h4 class="my-0 font-weight-normal text-dark">Создать новую рассылку</h4>
+                    <h4 class="my-0 font-weight-normal text-dark">Новая рассылка</h4>
                 </div>
                 <form method="post" action="" class="form-floating" enctype="multipart/form-data">
                      <div class="card-body">
@@ -213,8 +213,10 @@
                         </div>
                         <div class="mb-3">
                             <div class="row">
+                                <div class="col-12">
+                                    <label>Время <strong>(UTC+2)</strong></label>
+                                </div>
                                 <div class="col-6">
-                                    <label for="id_hour">Час</label>
                                     <select name="hour" class="form-control form-control-sm" id="id_hour">
                                         <option value="12" selected="">12</option>
                                     {% for hour in hours %}
@@ -223,7 +225,6 @@
                                     </select>
                                 </div>
                                 <div class="col-6">
-                                    <label for="id_minute">Минуты</label>
                                     <select name="minute" class="form-control form-control-sm" id="id_minute">
                                         {% for minute in minutes %}
                                             {% if minute < 10 %}
@@ -261,16 +262,17 @@
                 </form>
             </div>
         </div>
-        {% if not all_mailings %}
-        {% elif request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}
-        <a class="add-mobile btn btn-primary py-0" href="{% url 'sender:create_mailing_mobile' %}">
-            <img class="my-2" src="{% static 'img/add.png' %}">
-        </a>
-        {% elif request|is_tablet or request.META.HTTP_USER_AGENT|checkuseragenttablet %}
-        <a class="add-mobile btn btn-primary py-0" href="{% url 'sender:create_mailing_mobile' %}">
-            <img class="my-2" src="{% static 'img/add.png' %}">
-        </a>
         {% endif %}
+        {% if not all_mailings %}
+            {% if request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}
+            <a class="add-mobile btn btn-primary py-0" href="{% url 'sender:create_mailing_mobile' %}">
+                <img class="my-2" src="{% static 'img/add.png' %}">
+            </a>
+            {% elif request|is_tablet or request.META.HTTP_USER_AGENT|checkuseragenttablet %}
+            <a class="add-mobile btn btn-primary py-0" href="{% url 'sender:create_mailing_mobile' %}">
+                <img class="my-2" src="{% static 'img/add.png' %}">
+            </a>
+            {% endif %}
         {% endif %}
         {% endif %}
     </div>

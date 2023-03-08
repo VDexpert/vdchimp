@@ -123,5 +123,7 @@ def datetostr(date):
 def checkpermissions(user):
     return True if not user.has_perm('sender.view_and_ban_any_mailing') and not user.has_perm('sender.view_and_ban_any_user') and not user.has_perm('sender.content_management') else False
 
-def returnhomeobjectpk(some):
-    return Home.objects.all().first().pk
+
+@register.filter
+def getlastsymbol(path):
+    return str(path)[-1:]

@@ -1,0 +1,51 @@
+{% extends 'sender/base.html' %}
+
+{% block content %}
+    {% load static %}
+    {% load sender_tags %}
+    {% load sender_filters %}
+    {% load user_agents %}
+
+<head>
+  <title>Письмо {{ object.title }}</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+
+<div class="container my-5 d-flex justify-content-center">
+    <div class="card box-shadow border-dark mx-2 media-form">
+        <div class="card-header border-0 bg-transparent px-0 d-flex text-center">
+            <h4 class="text-dark my-0 font-weight-normal">Письмо</h4>
+            <a class="close-header-form-popup" href="{% url 'sender:mailing_detail' mailing.pk %}">
+                <img class="icon-close-header-form-popup" src="{% static 'img/close.png' %}">
+            </a>
+        </div>
+        <div class="card-body">
+            <dic class="card-title">
+                <h5>{{ object.title }}</h5>
+            </dic>
+            <div class="card-text">
+                {% autoescape off %}{{ object.content }}{% endautoescape %}
+            </div>
+         </div>
+        {% if not perms.sender.view_and_ban_any_mailing %}
+        <div class="card-footer bg-transparent border-0 px-0 mb-3">
+            <div class="row">
+                <div class="col-6 d-flex">
+                    <a class="btn btn-outline-primary  {% if request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}w-75
+                                                        {% else %}w-50{% endif %}" style="margin-left: auto" href="{% url 'sender:update_letter' mailing.pk object.pk %}#{{ request.path|getlastsymbol }}">
+                        <strong>Изменить</strong>
+                    </a>
+                </div>
+                <div class="col-6 d-flex">
+                    <a class="btn btn-outline-danger {% if request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}w-75
+                                                        {% else %}w-50{% endif %}" style="margin-right: auto" href="{% url 'sender:delete_letter' mailing.pk object.pk %}#{{ request.path|getlastsymbol }}">
+                        <strong>Удалить</strong>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

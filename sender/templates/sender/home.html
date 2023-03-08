@@ -3,6 +3,7 @@
 {% block content %}
     {% load static %}
     {% load user_agents %}
+    {% load sender_filters %}
 
 <head>
     <title>{{ home.title }}</title>
@@ -12,39 +13,56 @@
 </head>
 
 <div class="container px-0 py-0 mt-0 mb-5 text-center px-0 header-home">
-    <div class="card text-bg-dark border-0 d-flex justify-content-center card-header-home">
+    <div class="card border-0 d-flex justify-content-center card-header-home">
+        {% if request|is_pc or request|is_tablet or request.META.HTTP_USER_AGENT|checkuseragenttablet %}
         <div class="wrapper-header-home-pc exmpl-header-home">
             <img  class="card-img bg-home-header" src="{{ home.picture.url }}">
          </div>
+        {% endif %}
+         {% if request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}
+         <div class="card-body">
+         {% else %}
          <div class="card-img-overlay home-text-overlay">
+         {% endif %}
+         {% if request|is_tablet or request.META.HTTP_USER_AGENT|checkuseragenttablet %}
+             <h1 class="card-title mt-3">{{ home.home_h1 }}</h1>
+         {% elif request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}
+            <h1 class="card-title mt-3">{{ home.home_h1 }}</h1>
+         {% else %}
              <h1 class="card-title mt-5">{{ home.home_h1 }}</h1>
+         {% endif %}
              <p class="lead mt-3">{{ home.home_annotation }}</p>
-             {% if request|is_pc %}
-             <div class="row mt-4">
+             {% if request|is_pc or request|is_tablet or request.META.HTTP_USER_AGENT|checkuseragenttablet %}
+             <div class="row mt-5">
                 <div class="col-4">
-                    <input type="number" class="hide" value="{{ home.count_all_mailings }}" id="GetNum1">
-                    <h2 class="running_num" id="SetNum1"></h2>
+                    <input type="number" class="hide" value="{% if home.count_all_mailings %}{{ home.count_all_mailings }}{% else %}{{ db_count_all_mailings }}{% endif %}" id="GetNum1">
+                    <input type="number" class="hide" value="{{ home.step_all_mailings }}" id="StepNum1">
+                    <h2 class="running_num" id="SetNum1">0</h2>
                     <strong>Всего рассылок</strong>
                 </div>
                 <div class="col-4">
-                    <input type="number" class="hide" value="{{ home.count_active_mailings }}" id="GetNum2">
-                    <h2 class="running_num" id="SetNum2"></h2>
+                    <input type="number" class="hide" value="{% if home.count_active_mailings %}{{ home.count_active_mailings }}{% else %}{{ db_count_active_mailings }}{% endif %}" id="GetNum2">
+                    <input type="number" class="hide" value="{{ home.step_active_mailings }}" id="StepNum2">
+                    <h2 class="running_num" id="SetNum2">0</h2>
                     <strong>Из них активных</strong>
                 </div>
                 <div class="col-4">
-                    <input type="number" class="hide" value="{{ home.count_users }}" id="GetNum3">
-                    <h2 class="running_num" id="SetNum3"></h2>
+                    <input type="number" class="hide" value="{% if home.count_users %}{{ home.count_users }}{% else %}{{ db_count_users }}{% endif %}" id="GetNum3">
+                    <input type="number" class="hide" value="{{ home.step_users }}" id="StepNum3">
+                    <h2 class="running_num" id="SetNum3">0</h2>
                     <strong>Пользователей</strong>
                 </div>
             </div>
              {% endif %}
+            {% if not user.is_authenticated %}
              <div class="row d-flex justify-content-center mt-4">
                  <div class="col-lg-4 col-xl-3 col-md-5 col-sm-12 col-12">
-                    <button class="btn btn-block btn-warning" href="{% url 'sender:registration' %}">
+                    <a class="btn btn-register btn-lg btn-warning" href="{% url 'sender:registration' %}">
                         <strong>ЗАРЕГИСТРИРОВАТЬСЯ</strong>
-                    </button>
+                    </a>
                 </div>
              </div>
+            {% endif %}
          </div>
     </div>
 </div>
@@ -57,7 +75,7 @@
 <div class="container d-flex justify-content-center mb-5 advantages-container">
     <div class="row d-flex justify-content-center text-center">
         {%  for advantage in advantage_list %}
-        <div class="col-lg-4 col-md-4 col-sm-12 col-12 advantage-card">
+        <div class="col-lg-4 col-md-4 col-sm-12 col-12" style="max-width: 300px">
             <div class="card text-center border-dark bg-warning mb-3">
                 <div class="card-header border-0 bg-transparent">
                     <h5>{{ advantage.title }}</h5>
@@ -79,7 +97,7 @@
 <div class="container d-flex justify-content-center mb-3">
     <div class="row">
         {% for post in post_list %}
-        <div class="col-lg-4 col-md-6 col-sm-12">
+        <div class="col-lg-6 col-xl-4 col-md-6 col-sm-12">
             <div class="card text-bg-dark border-0 mb-3">
                 <div class="wrapper-post exmpl">
                     <img  class="card-img bg-post-preview" src="{% if post.picture %}{{ post.picture.url }}
@@ -107,17 +125,21 @@
  </div>
 
 <script>
+
+    const time = 1000; //ms
+
 function runNum1() {
     const elem1 = document.getElementById('SetNum1');
     const num1 = Number(document.getElementById('GetNum1').value);
-    let time = 1000; //ms
-    let step = 1;
+    const step1 = Number(document.getElementById('StepNum1').value);
     let n = 0;
-    let t = Math.round(time/(num1/step));
+    let t = Math.round(time/(num1/step1));
     let interval = setInterval(() => {
-        n = n + step;
-        if (n === num1) {
+        n = n + step1;
+        if (n >= num1) {
             clearInterval(interval);
+            elem1.innerHTML = num1;
+            return true
         }
         elem1.innerHTML = n;
         },
@@ -128,14 +150,15 @@ runNum1();
 function runNum2() {
     const elem2 = document.getElementById('SetNum2');
     const num2 = Number(document.getElementById('GetNum2').value);
-    let time = 1000; //ms
-    let step = 1;
+    const step2 = Number(document.getElementById('StepNum2').value);
     let n = 0;
-    let t = Math.round(time/(num2/step));
+    let t = Math.round(time/(num2/step2));
     let interval = setInterval(() => {
-        n = n + step;
-        if (n === num2) {
+        n = n + step2;
+        if (n >= num2) {
             clearInterval(interval);
+            elem2.innerHTML = num2;
+            return true
         }
         elem2.innerHTML = n;
         },
@@ -146,14 +169,15 @@ runNum2();
 function runNum3() {
     const elem3 = document.getElementById('SetNum3');
     const num3 = Number(document.getElementById('GetNum3').value);
-    let time = 1000; //ms
-    let step = 1;
+    const step3 = Number(document.getElementById('StepNum3').value);
     let n = 0;
-    let t = Math.round(time/(num3/step));
+    let t = Math.round(time/(num3/step3));
     let interval = setInterval(() => {
-        n = n + step;
-        if (n === num3) {
+        n = n + step3;
+        if (n >= num3) {
             clearInterval(interval);
+            elem3.innerHTML = num3;
+            return true
         }
         elem3.innerHTML = n;
         },

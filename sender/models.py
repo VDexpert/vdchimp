@@ -171,6 +171,7 @@ class Home(models.Model):
     home_annotation = models.CharField(max_length=150, verbose_name='Аннотация', help_text='До 150 символов')
     title = models.CharField(max_length=70, verbose_name='Метатэг Title', help_text='До 70 символов')
     description = tinymce_models.HTMLField(verbose_name='Содержание', **NULLABLE)
+    test_email = models.EmailField(verbose_name='Почта для теста', help_text='ПОЛЕ НЕ ДОЛЖНО БЫТЬ ПУСТЫМ', **NULLABLE)
     annotation_advantages = models.CharField(max_length=100, verbose_name='Заголовок перед блоком преимуществ',
                                         **NULLABLE, help_text='До 100 символов')
     annotation_posts = models.CharField(max_length=100, verbose_name='Заголовок перед блоком случайных постов',
@@ -179,10 +180,17 @@ class Home(models.Model):
                                 help_text='рекомендуемый размер - 2000*1000')
     count_all_mailings = models.IntegerField(verbose_name='Всего рассылок',
                                              help_text='Если поле пустое - берется автоматически из БД', **NULLABLE)
+    step_all_mailings = models.IntegerField(verbose_name='Шаг количества рассылок', default=1,
+                                             help_text='Для корректировки скорости вывода разных по величине цифр')
     count_active_mailings = models.IntegerField(verbose_name='Активных рассылок',
                                                 help_text='Если поле пустое - берется автоматически из БД', **NULLABLE)
+    step_active_mailings = models.IntegerField(verbose_name='Шаг активных рассылок', default=1,
+                                                help_text='Для корректировки скорости вывода разных по величине цифр')
+
     count_users = models.IntegerField(verbose_name='Количество пользователей',
                                       help_text='Если поле пустое - берется автоматически из БД', **NULLABLE)
+    step_users = models.IntegerField(verbose_name='Шаг количества пользователей', default=1,
+                                      help_text='Для корректировки скорости вывода разных по величине цифр')
     meta_description = models.CharField(verbose_name='Метатэг description', max_length=300, **NULLABLE,
                                         help_text='До 300 символов')
     meta_keywords = models.CharField(max_length=150, verbose_name='Метатег Keywords', **NULLABLE,

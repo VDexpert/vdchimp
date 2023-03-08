@@ -52,7 +52,7 @@
                                        {% else %}table-info
                                        {% endif %}">
                                 <td>
-                                    <a href="{% url 'sender:post_detail' object.slug %}">
+                                    <a class="dark-link" href="{% url 'sender:post_detail' object.slug %}">
                                         <p>{{ object.title }}</p>
                                     </a>
                                     {% if object.status == inactive %}

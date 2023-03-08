@@ -5,15 +5,21 @@
 <head>
   <title>Рассылка {{ object.title }}</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    {{ form.media }}
 </head>
 
-<div class="container my-5 justify-content-center px-0 mx-0" style="min-height: 600px;">
+<div class="container my-5 justify-content-center px-0 mx-0" id="MailingContainer">
     <div class="row">
         <div class="col-lg-4 col-xl-3 col-md-12 col-sm-12 col-12 px-0">
             <div class="card td-table-info border-dark mx-3 mb-3">
               <div class="card-header text-center bg-warning">
                   <h5 class="text-dark">{{ object.title }}</h5>
               </div>
+            {% if object.from_email %}
+            <div class="card-header td-table-info">
+             {{ object.from_email }}
+            </div>
+            {% endif %}
               <div class="card-body pb-0 px-2">
                     <h6 class="card-subtitle mb-2 text-muted mx-2">Настройки рассылки</h6>
                     <table class="table table-info mb-0 px-5">
@@ -26,7 +32,7 @@
                                 <td class="col-4">Время:</td>
                                 <td class="col-8">{{ object.hour }}:{% if object.minute < 10 %}0{{ object.minute }}
                                                                     {% else %}{{ object.minute }}
-                                                                    {% endif %}
+                                                                    {% endif %} <strong>(UTC+2)</strong>
                                 </td>
                             </tr>
                         </tbody>
@@ -99,11 +105,21 @@
                       </div>
                  </div>
                 {% endif %}
-                <div class="card-footer py-1 text-center {% if object.periodicity == period_mailing_week and not object.weekdays %}bg-danger
+                {% if not perms.sender.view_and_ban_any_mailing %}
+                    {% if object.from_email %}
+                    <div class="card-footer td-table-info text-center border-0 py-0">
+                        <a class="dark-link" href="{% url 'sender:change_password_email' object.pk %}">
+                           <strong><span>Пароль рассылки</span></strong>
+                        </a>
+                    </div>
+                    {% endif %}
+                {% endif %}
+                <div class="card-footer border-0 py-1 mt-2 text-center {% if object.periodicity == period_mailing_week and not object.weekdays %}bg-danger
                                                         {% elif object.banned == ban_mailing_true %}bg-danger
                                                         {% elif object.periodicity == period_mailing_month and not object.monthdates %}bg-danger
                                                         {% elif not object.mail_dump %}bg-danger
                                                         {% elif not object.from_email %}bg-danger
+                                                        {% elif not object.password_from_email %}bg-danger
                                                         {% else %}td-table-info
                                                         {% endif %}">
                         {% if object.status == status_mailing_done %}<span class="text-dark"><strong>Рассылка завершена
@@ -111,16 +127,14 @@
                         {% elif object.periodicity == period_mailing_week and not object.weekdays %}<span class="text-light"><strong> Добавьте дни недели рассылки</strong></span>
                         {% elif object.periodicity == period_mailing_month and not object.monthdates %}<span class="text-light"><strong>Добавьте даты месяца рассылки</strong></span>
                         {% elif not object.mail_dump %}<span class="text-light"><strong> Загрузите базу мейлов </strong></span>
-                        {% elif not object.from_email %}
-                            <a class="update-mailing-detail-white" href="{% url 'sender:update_mailing' object.pk %}">
-                               <strong><span class="text-light">Добавьте email рассылки</span></strong>
-                            </a>
-                        {% else %}<span class="text-dark"><strong>Готово к работе! <br> Email: {{ object.from_email }}</strong></span>
-                           {% if not perms.sender.view_and_ban_any_mailing %}
-                            <a class="update-mailing-detail" href="{% url 'sender:update_mailing' object.pk %}">
-                                <br><strong>Изменить email</strong>
+                        {% elif not object.from_email %}<span class="text-light"><strong>Укажите Email рассылки</strong></span>
+                            {% if not perms.sender.view_and_ban_any_mailing %}
+                            <br><a class="update-mailing-detail-white" href="{% url 'sender:update_mailing' object.pk %}">
+                               <strong><span class="text-light">Указать</span></strong>
                             </a>
                             {% endif %}
+                        {% elif not object.password_from_email %}<span class="text-light"><strong>Укажите пароль от Email</strong></span>
+                        {% else %}<span class="text-dark"><strong>Готово к работе!</strong></span>
                         {% endif %}
                 </div>
                 {% if not perms.sender.view_and_ban_any_mailing %}
@@ -193,16 +207,16 @@
                     {% if letters %}
                     <div class="row td-table-info mb-0 mx-0">
                         {% if request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}
-                             <div class="col-6 my-2">
+                             <div class="col-5 my-2">
                                 <strong>Тема</strong>
                             </div>
                         {% else %}
-                           <div class="col-3 my-2">
+                           <div class="col-2 my-2">
                                 <strong>Тема</strong>
                             </div>
                         {% endif %}
                         {% if request|is_pc or request|is_tablet or request.META.HTTP_USER_AGENT|checkuseragenttablet %}
-                            <div class="col-6 my-2">
+                            <div class="col-7 my-2">
                                 <strong>Содержание письма</strong>
                             </div>
                         {% endif %}
@@ -211,7 +225,7 @@
                                 <strong>Статус</strong>
                             </div>
                         {% else %}
-                            <div class="col-2 my-2 px-0">
+                            <div class="col-3 my-2 px-0">
                                 <strong>Статус</strong>
                             </div>
                         {% endif %}
@@ -223,36 +237,36 @@
                             <div class="card-letter card col-12 card-letter" {% if letter.status == status_letter_sent  %}title="SentLetter"{% endif %}>
                                 <div class="row py-2 {% if letter.status == status_letter_sent  %}td-table-success{% endif %}">
                                     {% if request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}
-                                        <div class="col-6">
-                                            {{ letter.title }}
+                                        <div class="col-5">
+                                            <a class="dark-link" href="{% url 'sender:letter_detail' object.pk letter.pk %}#{{ forloop.counter }}">{{ letter.title }}</a>
                                         </div>
                                     {% else %}
-                                        <div class="col-3">
-                                            {{ letter.title }}
+                                        <div class="col-2">
+                                            <a class="dark-link" href="{% url 'sender:letter_detail' object.pk letter.pk %}#{{ forloop.counter }}">{{ letter.title }}</a>
                                         </div>
                                     {% endif %}
                                     {% if request|is_pc or request|is_tablet or request.META.HTTP_USER_AGENT|checkuseragenttablet %}
                                         <div class="col-6">
-                                            {{ letter.content|truncatechars:200 }}
+                                            {% autoescape off %}{{ letter.content|truncatechars_html:200}}{% endautoescape %}
                                         </div>
                                     {% endif %}
                                     {% if request|is_pc or request|is_tablet or request.META.HTTP_USER_AGENT|checkuseragenttablet %}
-                                        <div class="col-2">
+                                        <div class="col-3">
                                             <div class="row">
                                                 {% if not perms.sender.view_and_ban_any_mailing %}
                                                 <div class="col-11 px-0">
                                                 {% else %}
                                                 <div class="col-12 px-0">
                                                 {% endif %}
-                                                    {{ letter.status }} {% if letter.status != status_letter_sent %}
+                                                    {{ letter.status }}. {% if letter.status != status_letter_sent %}
                                                                         Очередь:<strong>#{{ forloop.counter|calcposition:sent_letters_count }}
                                                                         {% endif %}</strong>
                                                 </div>
                                                 {% if not perms.sender.view_and_ban_any_mailing %}
                                                 <div class="col-1 px-1">
-                                                    {% if not request|is_mobile or not request.META.HTTP_USER_AGENT|checkuseragentphone %}
+                                                    {% if request|is_pc or request|is_tablet or request.META.HTTP_USER_AGENT|checkuseragenttablet %}
                                                         {% if letter.status != status_letter_sent %}
-                                                            <a href="{{ letter.get_absolute_url }}">
+                                                            <a href="{% url 'sender:update_letter' object.pk letter.pk %}#{{ forloop.counter }}">
                                                                 <img class="mb-1 mx-3" src="{% static "img/update.png" %}" title="Редактировать письмо">
                                                             </a>
                                                         {% endif %}
@@ -266,7 +280,7 @@
                                             </div>
                                         </div>
                                      {% elif request|is_mobile or request.META.HTTP_USER_AGENT|checkuseragentphone %}
-                                        <div class="col-6">
+                                        <div class="col-7">
                                             <div class="container px-0">
                                                 <div class="row">
                                                     <div class="col-9">
@@ -274,14 +288,16 @@
                                                                             Очередь:<strong>#{{ forloop.counter|calcposition:sent_letters_count }}
                                                                             {% endif %}</strong>
                                                     </div>
+                                                    {% if not perms.sender.view_and_ban_any_mailing %}
                                                     <div class="col-3">
-                                                        <a href="{{ letter.get_absolute_url }}">
-                                                            <img style="margin-left: auto" class="mb-1" src="{% static "img/updatemobile.png" %}" title="Редактировать письмо">
+                                                        <a href="{% url 'sender:update_letter' object.pk letter.pk %}#{{ forloop.counter }}">
+                                                            <img style="margin-left: auto" class="mb-1" src="{% static "img/update.png" %}" title="Редактировать письмо">
                                                         </a>
-                                                        <a href="{% url 'sender:delete_letter' object.pk letter.pk %}">
-                                                            <img style="margin-left: auto" class="mb-1" src="{% static "img/deletemobile.png" %}" title="Удалить письмо">
+                                                        <a href="{% url 'sender:delete_letter' object.pk letter.pk %}#{{ forloop.counter }}">
+                                                            <img style="margin-left: auto" class="mb-1" src="{% static "img/delete.png" %}" title="Удалить письмо">
                                                         </a>
                                                     </div>
+                                                    {% endif %}
                                                 </div>
                                             </div>
                                         </div>

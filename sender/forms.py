@@ -1,9 +1,13 @@
+from smtplib import SMTPException
+
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django import forms
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.mail import send_mail
+from config import settings
 from sender.forms_mixin import StyleFormMixin
-from sender.models import User, LetterMailing, Blog, ConfigMailing, Post
+from sender.models import User, LetterMailing, Blog, ConfigMailing, Post, Home
 from sender.utils import custom_send_mail
 
 
@@ -197,3 +201,11 @@ class CustomUserEditForm(StyleFormMixin, forms.ModelForm):
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'country', 'phone',)
+
+
+class PasswordFromEmailForm(forms.ModelForm):
+    new_password2 = forms.CharField(label='Повторите пароль', max_length=150, required=True)
+
+    class Meta:
+        model = ConfigMailing
+        fields = ('password_from_email',)

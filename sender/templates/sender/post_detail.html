@@ -3,6 +3,7 @@
     {% load static %}
     {% load user_agents %}
     {% load sender_filters %}
+    {% load tz %}
 
 {% block content %}
 
@@ -26,9 +27,9 @@
                         &nbsp;&nbsp;&nbsp;&nbsp;<img src="{% static 'img/eye.svg' %}">  {{ object.count_views }}
                         </small>
                     </p>
-                    {% if perms.sender.content_management %}
+                    {% if perms.sender.content_management and object.change_at %}
                         <p class="card-text">
-                            <small class="text-muted">Изменено: {{ object.change_at }}</small>
+                            <small class="text-muted">Изменено: {{ object.change_at|timezone:"Europe/Moscow" }} (UTC+2)</small>
                         </p>
                     {% endif %}
                     <p class="card-text">{% autoescape off %}{{ object.content|linebreaks }}{% endautoescape %}

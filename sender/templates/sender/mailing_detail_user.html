@@ -10,5 +10,27 @@
     {% include 'sender/includes/mailing_detail_for_mailing_generics.html' %}
 </div>
 
+<script>
+function openFilter() {document.getElementById("Filter").style.display = "block";}
+function closeFilter() {document.getElementById("Filter").style.display = "none";}
+function hideSentLetters() {
+    let elements = document.getElementsByClassName("card-letter")
+
+    for (let elem of elements) {
+        if (elem.title === 'SentLetter') {
+            elem.style.display = 'none'
+        }
+    }
+}
+function showSentLetters() {
+    let elements = document.getElementsByClassName("card-letter")
+
+    for (let elem of elements) {
+        if (elem.title === 'SentLetter') {
+            elem.style.display = 'block'
+        }
+    }
+}
+</script>
 
 {% endblock %}

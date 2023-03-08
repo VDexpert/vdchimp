@@ -12,7 +12,7 @@
 
 <div class="container position-relative form-imitation-popup-parent py-0 px-0 mx-0">
     {% include 'sender/includes/mailing_detail_for_mailing_generics.html' %}
-     <div class="card box-shadow card-form-popup text-center border-dark border-dark my-5 mx-3 px-0" style="max-width: 550px">
+     <div class="card box-shadow card-form-popup text-center border-dark border-dark my-5 mx-3 px-0 point-days-form">
             <div class="card-header px-0 card-header-form-popup bg-warning">
                 <h4 class="text-dark my-0 font-weight-normal header-text-form-popup">Даты месяца рассылки</h4>
                 <a class="close-header-form-popup" href="{% url 'sender:mailing_detail' object.pk %}">
@@ -97,6 +97,12 @@ function changeValuesClick(input_selected) {
         input_selected.name = imp_value;
     }
 }
+
+function setContainerHeight() {
+    const elem = document.getElementById('MailingContainer');
+    elem.style.minHeight = 500 + 'px';
+}
+setContainerHeight()
 </script>
 
 {% endblock %}

@@ -24,7 +24,8 @@ class Command(BaseCommand):
         user = User.objects.all().get(id=options['user'])
         mailing = ConfigMailing.objects.all().get(id=options['mailing'])
 
-        if mailing.banned != ConfigMailing.BANNED_TRUE:
+        if mailing.banned != ConfigMailing.BANNED_TRUE and mailing.from_email and mailing.password_from_email:
+            print('\nИнициализация крона')
             letters = sorted(LetterMailing.objects.all().filter(mailing=mailing, status=LetterMailing.STATUS_WAIT))
 
             if len(letters):
@@ -45,7 +46,13 @@ class Command(BaseCommand):
                         recipient_list.append(client.encode('utf-8'))
                 try:
                     if len(recipient_list):
-                        send_mail(subject=subject, message=message, from_email=mailing.from_email, recipient_list=recipient_list)
+                        send_mail(
+                            subject=subject,
+                            message=message,
+                            from_email=mailing.from_email,
+                            auth_password=mailing.password_from_email,
+                            recipient_list=recipient_list
+                        )
                     else:
                         print('База рассылки пустая')
 
@@ -75,3 +82,6 @@ class Command(BaseCommand):
                         sent_letter.status = LetterMailing.STATUS_SENT
                         sent_letter.save()
                         print('Успешное завершение крона')
+        else:
+            password_exist = 'Задан' if mailing.password_from_email else 'Не задан'
+            print(f'\nОшибка инициализации крона: {timezone.now()}\nID рассылки: {mailing.pk}\nПользователь: {mailing.user.email}\nПочта рассылки: {mailing.from_email}\nПароль от почты: {password_exist}')

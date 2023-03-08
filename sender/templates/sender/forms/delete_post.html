@@ -9,8 +9,11 @@
 
 <div class="container d-flex justify-content-center">
     <div class="card box-shadow border-dark mx-3 my-5 delete-form text-center">
-        <div class="card-header text-bg-warning py-1">
+        <div class="card-header header-text-form-popup text-bg-warning py-1 d-flex">
         <h3>Удаление статьи</h3>
+        <a class="close-header-form-popup" href="{% url 'sender:content_management_posts' %}">
+            <img class="icon-close-header-form-popup" src="{% static 'img/close.png' %}">
+        </a>
     </div>
         <div class="card-body">
             <form method="post" enctype="multipart/form-data">
