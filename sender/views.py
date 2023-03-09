@@ -58,8 +58,8 @@ def redirect_to_main_page(user):
 
 class ConfigMailingDetailView(DetailView):
     '''
-    Экземпляр данного класса служит прокси-объектом для передачи динамического контекста нескольким
-    другим контроллерам, также основанным на модели ConfigMailing и контроллере DetailView
+    Экземпляр данного класса служит прокси-объектом для передачи динамического и статического
+    контекста нескольким другим контроллерам, также основанным на модели ConfigMailing
     '''
     model = ConfigMailing
     template_name = 'sender/mailing_detail_user.html'
