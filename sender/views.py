@@ -1,7 +1,5 @@
 import os
-from random import randint
 from smtplib import SMTPException
-from django.contrib.auth.hashers import make_password, identify_hasher
 from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from django.utils import timezone
@@ -18,7 +16,6 @@ from django.http import HttpResponseRedirect
 from sender.models import*
 from sender.utils import custom_send_mail, translit
 from django.contrib.auth.tokens import default_token_generator as token_gen
-
 from sender.utils.cache import cache_home_posts, cache_blog
 
 weekdays_cron_dict = {
@@ -287,6 +284,24 @@ class ConfigMailingCreateViewMobile(CreateView):
             end = '} | crontab -'
             os_cmd = start + time + cmd + end
             os.system(os_cmd)
+
+        if self.object.periodicity == self.model.PERIOD_WEEK:
+            if self.object.weekdays:
+                start = 'crontab -l | { cat; echo '
+                time = f'''"{self.object.minute} {self.object.hour} * * {self.object.weekdays} '''
+                cmd = f'{cmd}"; '
+                end = '} | crontab -'
+                os_cmd = start + time + cmd + end
+                os.system(os_cmd)
+
+        if self.object.periodicity == self.model.PERIOD_MONTH:
+            if self.object.monthdates:
+                start = 'crontab -l | { cat; echo '
+                time = f'''"{self.object.minute} {self.object.hour} {self.object.monthdates} * * '''
+                cmd = f'{cmd}"; '
+                end = '} | crontab -'
+                os_cmd = start + time + cmd + end
+                os.system(os_cmd)
 
         return super().form_valid(form)
 
