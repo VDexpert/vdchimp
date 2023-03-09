@@ -5,7 +5,7 @@
 <div class="card border-dark text-center mx-3 mailing-form">
     <div class="card-header bg-warning px-0 d-flex">
         <h4 class="header-text-form-popup text-dark my-0 font-weight-normal">
-            {% if object.get_absolute_url %}Редактирование {% else %}Создание {% endif %}рассылки</h4>
+            {% if object.get_absolute_url %}Настройки рассылки {% else %}Новая рассылка{% endif %}</h4>
         <a class="close-header-form-popup" href="{% if object.get_absolute_url %}{% url 'sender:mailing_detail' object.pk %}
                                             {% else %}{% url 'sender:profile' %}{% endif %}">
             <img class="icon-close-header-form-popup" src="{% static 'img/close.png' %}">
