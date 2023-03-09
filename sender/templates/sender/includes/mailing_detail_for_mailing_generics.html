@@ -134,7 +134,8 @@
                             </a>
                             {% endif %}
                         {% elif not object.password_from_email %}<span class="text-light"><strong>Укажите пароль от Email</strong></span>
-                        {% else %}<span class="text-dark"><strong>Готово к работе!</strong></span>
+                        {% elif object.status != status_mailing_started %}<span class="text-dark"><strong>Готово к работе!</strong></span>
+                        {% else %}<span class="text-dark"><strong>{{ object.status }}</strong></span>
                         {% endif %}
                 </div>
                 {% if not perms.sender.view_and_ban_any_mailing %}

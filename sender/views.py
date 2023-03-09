@@ -27,6 +27,7 @@ weekdays_cron_dict = {
 def include_static_context():
     context = {}
     context['status_mailing_done'] = ConfigMailing.STATUS_DONE
+    context['status_mailing_started'] = ConfigMailing.STATUS_STARTED
     context['status_mailing_moderating'] = ConfigMailing.STATUS_MODERATING
     context['period_mailing_month'] = ConfigMailing.PERIOD_MONTH
     context['period_mailing_week'] = ConfigMailing.PERIOD_WEEK

@@ -69,6 +69,8 @@ class Command(BaseCommand):
                         current_try.mail_server_respond = success_sent
                         current_try.letter = sent_letter
                         current_try.save()
+                        mailing.status = ConfigMailing.STATUS_STARTED
+                        mailing.save()
 
                         if len(letters) == 1:
                             print('''Последнее письмо. Смена статуса рассылки на "Завершена" и удаление крона''')
