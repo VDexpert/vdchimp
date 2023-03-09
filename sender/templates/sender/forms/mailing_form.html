@@ -33,7 +33,7 @@
                     <div class="col-6">
                         <select name="hour" class="form-control form-control-sm" id="id_hour">
                         {% if object.hour %}
-                            <option value="object.hour" selected="">object.hour</option>
+                            <option value="{{ object.hour }}" selected="">{{ object.hour }}</option>
                         {% else %}
                             <option value="12" selected="">12</option>
                         {% endif %}
