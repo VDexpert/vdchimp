@@ -2,6 +2,7 @@
 
 {% block content %}
     {% load static %}
+    {% load sender_filters %}
 
 <head>
   <title>Попытки рассылки</title>
@@ -40,6 +41,11 @@
                         <p>Ответ почтового сервера: "{{ object.mail_server_respond }}"</p>
                     </div>
                 </div>
+                 {% if perms.sender.view_and_ban_any_mailing %}
+                <div class="card-footer">
+                    <img src="{% static 'img/user.png' %}">&nbsp;<strong>{{ object.user.email|cutemail }}</strong>
+                </div>
+                {% endif %}
             </div>
         </div>
     {% endfor %}
