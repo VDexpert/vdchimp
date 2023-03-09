@@ -141,7 +141,7 @@
                                                 <br><strong><span>Изменить email</span></strong>
                                             </a>
                                          {% endif %}
-                                    {% else %}<strong>object.status </strong><br> <strong>Email рассылки: </strong>{{ object.from_email }}
+                                    {% else %}<strong>{{ object.status }} </strong><br> <strong>Email рассылки: </strong>{{ object.from_email }}
                                          {% if not perms.sender.view_and_ban_any_mailing %}
                                             <a class="update-mailing-detail" href="{% url 'sender:update_mailing' object.pk %}">
                                                 <br><strong><span>Изменить email</span></strong>
