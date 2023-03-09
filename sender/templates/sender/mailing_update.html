@@ -6,7 +6,7 @@
     {% load sender_filters %}
 
 <head>
-  <title>Редактирование рассылки {{ object.title }}</title>
+  <title>{% if object.title %}Настройки рассылки {{ object.title }}{% else %}Создание рассылки{% endif %}</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head>
 
@@ -20,7 +20,7 @@
 <script>
 function setContainerHeight() {
     const elem = document.getElementById('MailingContainer');
-    elem.style.minHeight = 580 + 'px';
+    elem.style.minHeight = 480 + 'px';
 }
 setContainerHeight()
 </script>
