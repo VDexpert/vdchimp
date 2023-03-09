@@ -23,7 +23,7 @@
                 <label for="id_title">{{ form.from_email.label }}</label>
                 <input type="text" {% if object.from_email %}value="{{ object.from_email }}"{% endif %} class="form-control form-control-sm" name="from_email" maxlength="100" id="id_from_email">
                 <div class="form-error text-danger">{{  form.from_email.errors|format_err }}</div>
-                <span class="help-text">должна быть почтой для домена вашего сайта</span>
+                <span class="help-text">рекомендуем указывать почту для домена</span>
             </div>
             <div class="col-12 mb-2">
                 <div class="row">
