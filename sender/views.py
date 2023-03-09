@@ -285,24 +285,6 @@ class ConfigMailingCreateViewMobile(CreateView):
             os_cmd = start + time + cmd + end
             os.system(os_cmd)
 
-        if self.object.periodicity == self.model.PERIOD_WEEK:
-            if self.object.weekdays:
-                start = 'crontab -l | { cat; echo '
-                time = f'''"{self.object.minute} {self.object.hour} * * {self.object.weekdays} '''
-                cmd = f'{cmd}"; '
-                end = '} | crontab -'
-                os_cmd = start + time + cmd + end
-                os.system(os_cmd)
-
-        if self.object.periodicity == self.model.PERIOD_MONTH:
-            if self.object.monthdates:
-                start = 'crontab -l | { cat; echo '
-                time = f'''"{self.object.minute} {self.object.hour} {self.object.monthdates} * * '''
-                cmd = f'{cmd}"; '
-                end = '} | crontab -'
-                os_cmd = start + time + cmd + end
-                os.system(os_cmd)
-
         return super().form_valid(form)
 
 
@@ -335,6 +317,24 @@ class ConfigMailingUpdateView(UpdateView):
             end = '} | crontab -'
             os_cmd = start + time + cmd + end
             os.system(os_cmd)
+
+        if self.object.periodicity == self.model.PERIOD_WEEK:
+            if self.object.weekdays:
+                start = 'crontab -l | { cat; echo '
+                time = f'''"{self.object.minute} {self.object.hour} * * {self.object.weekdays} '''
+                cmd = f'{cmd}"; '
+                end = '} | crontab -'
+                os_cmd = start + time + cmd + end
+                os.system(os_cmd)
+
+        if self.object.periodicity == self.model.PERIOD_MONTH:
+            if self.object.monthdates:
+                start = 'crontab -l | { cat; echo '
+                time = f'''"{self.object.minute} {self.object.hour} {self.object.monthdates} * * '''
+                cmd = f'{cmd}"; '
+                end = '} | crontab -'
+                os_cmd = start + time + cmd + end
+                os.system(os_cmd)
 
         return super().form_valid(form)
 
