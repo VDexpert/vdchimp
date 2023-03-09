@@ -274,10 +274,10 @@ class ConfigMailingCreateViewMobile(CreateView):
         user = self.request.user
         self.object.user = user
         self.object.save()
+        path_project = '/'.join(os.path.abspath('manage.py').split('/')[3:-1])
+        cmd = f'cd {path_project} && myvenv/bin/python3 manage.py send_by_cron -u {user.pk} -m {self.object.pk} >> log_cronjobs.txt'''
 
         if self.object.periodicity == self.model.PERIOD_DAY:
-            path_project = '/'.join(os.path.abspath('manage.py').split('/')[3:-1])
-            cmd = f'cd {path_project} && myvenv/bin/python3 manage.py send_by_cron -u {user.pk} -m {self.object.pk} >> log_cronjobs.txt'''
             start = 'crontab -l | { cat; echo '
             time = f'''"{self.object.minute} {self.object.hour} * * * '''
             cmd = f'{cmd}"; '
