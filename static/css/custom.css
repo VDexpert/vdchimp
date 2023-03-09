@@ -221,6 +221,12 @@ input::placeholder {
 
 .username-link-card {
   pointer-events: auto;
+  color: black;
+  text-decoration: underline;
+}
+
+.username-link-card:hover {
+  text-decoration: unset;
 }
 
 a.update-ban-link {

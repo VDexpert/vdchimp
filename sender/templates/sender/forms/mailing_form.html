@@ -32,7 +32,11 @@
                     </div>
                     <div class="col-6">
                         <select name="hour" class="form-control form-control-sm" id="id_hour">
+                        {% if object.hour %}
+                            <option value="object.hour" selected="">object.hour</option>
+                        {% else %}
                             <option value="12" selected="">12</option>
+                        {% endif %}
                         {% for hour in hours %}
                             <option value="{{ hour }}">{{ hour }}</option>
                         {% endfor %}
@@ -40,6 +44,11 @@
                     </div>
                     <div class="col-6">
                         <select name="minute" class="form-control form-control-sm" id="id_minute">
+                            {% if object.minute %}
+                                <option value="{{ object.minute }}" selected="">{% if object.minute < 10 %}{{ object.minute }}0{% else %}{{ object.minute }}{% endif %}</option>
+                            {% else %}
+                                <option value="0" selected="">00</option>
+                            {% endif %}
                             {% for minute in minutes %}
                                 {% if minute < 10 %}
                                 <option value="{{ minute }}">0{{ minute }}</option>
