@@ -24,10 +24,10 @@
 {% endif %}
 
 <div class="container my-5">
-    <div class="row d-flex justify-content-center">
+    <div class="row row-cols-lg-5 row-cols-xl-4 row-cols-md-6 row-cols-sm-12 d-flex justify-content-center">
     {% for object in object_list %}
-        <div class="col-lg-5 col-xl-4 col-md-6 col-sm-12 col-12">
-            <div class="card mx-2 border-dark my-2">
+        <div class="col-12">
+            <div class="card mx-2 border-dark my-2 h-100">
                 <div class="card-header text-center bg-{% if object.mail_server_respond == 'Письмо успешно отправлено' %}warning{% else %}danger{% endif %}">
                     <h4 class="my-0 font-weight-normal {% if object.mail_server_respond == 'Письмо успешно отправлено' %}dark{% else %}text-white{% endif %}">{{ object.mailing.title }}</h4>
                 </div>
