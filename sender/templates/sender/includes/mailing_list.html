@@ -82,6 +82,7 @@
                                                             {% elif object.periodicity == period_mailing_month and not object.monthdates %} td-table-danger
                                                             {% elif not object.mail_dump %} td-table-danger
                                                             {% elif not object.from_email %} td-table-danger
+                                                            {% elif not object.password_from_email %} td-table-danger
                                                             {% else %} td-table-info
                                                             {% endif %}">
 
@@ -113,38 +114,42 @@
                                     {% elif object.banned == ban_mailing_true %} <strong>{{ object.banned }}!</strong>
                                     {% elif object.periodicity == period_mailing_week and not object.weekdays %} Добавьте дни недели рассылки
                                         {% if not perms.sender.view_and_ban_any_mailing %}
-                                            <a class="update-mailing-detail" href="{% url 'sender:update_weekday' object.pk %}">
-                                               <br><strong><span>Добавить дни</span></strong>
+                                             <br><a class="update-mailing-detail" href="{% url 'sender:update_weekday' object.pk %}">
+                                              <strong><span>Добавить дни</span></strong>
                                             </a>
                                          {% endif %}
                                     {% elif object.periodicity == period_mailing_month and not object.monthdates %} Добавьте даты месяца рассылки
                                         {% if not perms.sender.view_and_ban_any_mailing %}
-                                            <a class="update-mailing-detail" href="{% url 'sender:update_monthdate' object.pk %}">
-                                               <br><strong><span>Добавить даты</span></strong>
+                                            <br><a class="update-mailing-detail" href="{% url 'sender:update_monthdate' object.pk %}">
+                                               <strong><span>Добавить даты</span></strong>
                                             </a>
                                          {% endif %}
                                     {% elif not object.mail_dump %} Загрузите базу мейлов
                                         {% if not perms.sender.view_and_ban_any_mailing %}
-                                            <a class="update-mailing-detail" href="{% url 'sender:update_mailing' object.pk %}">
-                                                <br><strong><span>Загрузить</span></strong>
+                                             <br><a class="update-mailing-detail" href="{% url 'sender:update_mailing' object.pk %}">
+                                                <strong><span>Загрузить</span></strong>
                                             </a>
                                          {% endif %}
                                     {% elif not object.from_email %} Добавьте email рассылки
                                          {% if not perms.sender.view_and_ban_any_mailing %}
-                                            <a class="update-mailing-detail" href="{% url 'sender:update_mailing' object.pk %}">
-                                                <br><strong><span>Добавить</span></strong>
+                                             <br><a class="update-mailing-detail" href="{% url 'sender:update_mailing' object.pk %}">
+                                               <strong><span>Добавить</span></strong>
                                             </a>
                                          {% endif %}
+                                    {% elif not object.password_from_email %} Укажите пароль от Email
+                                        <br><a class="update-mailing-detail" href="{% url 'sender:change_password_email' object.pk %}">
+                                        <strong><span>Указать пароль</span></strong>
+                                    </a>
                                     {% elif object.status != status_mailing_started %}<strong>Готово к работе!</strong> <br>Email рассылки: {{ object.from_email }}
                                          {% if not perms.sender.view_and_ban_any_mailing %}
-                                            <a class="update-mailing-detail" href="{% url 'sender:update_mailing' object.pk %}">
-                                                <br><strong><span>Изменить email</span></strong>
+                                             <br><a class="update-mailing-detail" href="{% url 'sender:update_mailing' object.pk %}">
+                                                <strong><span>Изменить email</span></strong>
                                             </a>
                                          {% endif %}
                                     {% else %}<strong>{{ object.status }} </strong><br> Email рассылки: {{ object.from_email }}
                                          {% if not perms.sender.view_and_ban_any_mailing %}
-                                            <a class="update-mailing-detail" href="{% url 'sender:update_mailing' object.pk %}">
-                                                <br><strong><span>Изменить email</span></strong>
+                                             <br><a class="update-mailing-detail" href="{% url 'sender:update_mailing' object.pk %}">
+                                               <strong><span>Изменить email</span></strong>
                                             </a>
                                          {% endif %}
                                     {% endif %}
