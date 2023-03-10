@@ -29,7 +29,7 @@
         <div class="col-12 mx-2 my-2">
             <div class="card border-dark h-100">
                 <div class="card-header text-center bg-{% if object.mail_server_respond == 'Письмо успешно отправлено' %}warning{% else %}danger{% endif %}">
-                    <h4 class="my-0 font-weight-normal {% if object.mail_server_respond == 'Письмо успешно отправлено' %}dark{% else %}text-white{% endif %}">{{ object.mailing.title }}</h4>
+                    <h5 class="my-0 font-weight-normal {% if object.mail_server_respond == 'Письмо успешно отправлено' %}dark{% else %}text-white{% endif %}">{{ object.mailing.title }}</h5>
                 </div>
                 <div class="card-body">
                     <h6 class="card-subtitle">Письмо: {{ object.letter.title }}</h6>
