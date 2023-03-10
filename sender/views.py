@@ -1061,6 +1061,7 @@ class PostCreateView(CreateView):
         self.object.slug = translit.do(self.object.title)
         self.object.change_at = timezone.now()
         self.object.save()
+        os.system('redis-cli flushall')
 
         return super().form_valid(form)
 
@@ -1086,6 +1087,7 @@ class PostUpdateView(UpdateView):
         self.object.slug = translit.do(self.object.title)
         self.object.change_at = timezone.now()
         self.object.save()
+        os.system('redis-cli flushall')
 
         return super().form_valid(form)
 
@@ -1110,6 +1112,11 @@ class PostDeleteView(DeleteView):
 
     def get_success_url(self):
         return reverse_lazy('sender:content_management_posts')
+
+    def form_valid(self, form):
+        os.system('redis-cli flushall')
+
+        return  super().form_valid(form)
 
 
 class BlogUpdateView(UpdateView):
