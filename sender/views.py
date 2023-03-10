@@ -993,6 +993,12 @@ class PostListContentManagementListView(ListView):
 
         return super().get(request, *args, **kwargs)
 
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['inactive'] = self.model.STATUS_INACTIVE
+
+        return context
+
 
 class PostListView(ListView):
     model = Post
@@ -1003,7 +1009,7 @@ class PostListView(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['count_posts'] = self.get_queryset().count()
+        context['count_posts'] = self.get_queryset().filter(status=self.model.STATUS_ACTIVE).count()
         context['blog'] = Blog.objects.all().first()
         object_list = cache_blog(Post)
         paginator = Paginator(object_list, 12)
